@@ -14,7 +14,8 @@ const topArtists = [
     rating: 4.9,
     location: "Los Angeles, CA",
     image: artist1,
-    specialties: ["House", "Techno", "Progressive"]
+    specialties: ["House", "Techno", "Progressive"],
+    price: 750
   },
   {
     id: 2,
@@ -23,7 +24,8 @@ const topArtists = [
     rating: 4.8,
     location: "Nashville, TN",
     image: artist2,
-    specialties: ["Rock", "Blues", "Alternative"]
+    specialties: ["Rock", "Blues", "Alternative"],
+    price: 600
   },
   {
     id: 3,
@@ -32,7 +34,8 @@ const topArtists = [
     rating: 5.0,
     location: "New York, NY",
     image: artist3,
-    specialties: ["Jazz", "Soul", "R&B"]
+    specialties: ["Jazz", "Soul", "R&B"],
+    price: 820
   },
   {
     id: 4,
@@ -41,7 +44,8 @@ const topArtists = [
     rating: 4.7,
     location: "Miami, FL",
     image: artist4,
-    specialties: ["EDM", "Synthwave", "Ambient"]
+    specialties: ["EDM", "Synthwave", "Ambient"],
+    price: 500
   }
 ];
 
@@ -149,9 +153,19 @@ export const TopArtistsSection = () => {
                       </span>
                     ))}
                   </div>
+
+                  {/* Price */}
+                  
                   
                   {/* Premium CTA Button at Bottom */}
                   <div className="mt-auto">
+                  {/* {typeof (artist as any).price === 'number' && (
+                    <div className="mb-6">
+                      <span className="w-full justify-center inline-flex items-center px-3 py-1 rounded-full font-semibold bg-green-500/15 text-green-300 border border-green-400/30">
+                        From ${(artist as any).price}
+                      </span>
+                    </div>
+                  )} */}
                     <Button 
                       variant="hero" 
                       size="lg" 

@@ -1,6 +1,11 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ArtistJoinDialog } from "./ArtistJoinDialog";
+import { EventPlannerJoinDialog } from "./EventPlannerJoinDialog";
 
 export const JoinSection = () => {
+  const [artistOpen, setArtistOpen] = useState(false);
+  const [plannerOpen, setPlannerOpen] = useState(false);
   return (
     <section className="py-32 px-6 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-dark moving-bg"></div>
@@ -17,15 +22,17 @@ export const JoinSection = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
-            <Button variant="join" size="xl" className="pulse-glow">
+            <Button variant="join" size="xl" className="pulse-glow" onClick={() => setArtistOpen(true)}>
               Join as Artist
             </Button>
-            <Button variant="join" size="xl">
+            <Button variant="join" size="xl" onClick={() => setPlannerOpen(true)}>
               Join as Event Planner
             </Button>
           </div>
         </div>
       </div>
+      <ArtistJoinDialog open={artistOpen} onOpenChange={setArtistOpen} />
+      <EventPlannerJoinDialog open={plannerOpen} onOpenChange={setPlannerOpen} />
     </section>
   );
 };

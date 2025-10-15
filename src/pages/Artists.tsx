@@ -10,6 +10,7 @@ interface Artist {
   city: string;
   image: string;
   rating: number;
+  price?: number;
 }
 
 const allArtists: Artist[] = [
@@ -19,7 +20,8 @@ const allArtists: Artist[] = [
     talent: "DJ",
     city: "New York",
     image: "@/assets/artist-1.jpg",
-    rating: 4.8
+    rating: 4.8,
+    price: 650
   },
   {
     id: "2",
@@ -27,7 +29,8 @@ const allArtists: Artist[] = [
     talent: "Singer",
     city: "Los Angeles",
     image: "@/assets/artist-2.jpg",
-    rating: 4.9
+    rating: 4.9,
+    price: 550
   },
   {
     id: "3",
@@ -35,7 +38,8 @@ const allArtists: Artist[] = [
     talent: "Dancer",
     city: "Chicago",
     image: "@/assets/artist-3.jpg",
-    rating: 4.7
+    rating: 4.7,
+    price: 480
   },
   {
     id: "4",
@@ -43,7 +47,8 @@ const allArtists: Artist[] = [
     talent: "DJ",
     city: "Miami",
     image: "@/assets/artist-4.jpg",
-    rating: 4.6
+    rating: 4.6,
+    price: 700
   },
   {
     id: "5",
@@ -51,7 +56,8 @@ const allArtists: Artist[] = [
     talent: "Singer",
     city: "New York",
     image: "@/assets/artist-1.jpg",
-    rating: 4.9
+    rating: 4.9,
+    price: 590
   },
   {
     id: "6",
@@ -59,7 +65,8 @@ const allArtists: Artist[] = [
     talent: "Band",
     city: "Los Angeles",
     image: "@/assets/artist-2.jpg",
-    rating: 4.8
+    rating: 4.8,
+    price: 900
   },
   {
     id: "7",
@@ -67,7 +74,8 @@ const allArtists: Artist[] = [
     talent: "Dancer",
     city: "Miami",
     image: "@/assets/artist-3.jpg",
-    rating: 4.5
+    rating: 4.5,
+    price: 450
   },
   {
     id: "8",
@@ -75,7 +83,8 @@ const allArtists: Artist[] = [
     talent: "DJ",
     city: "Chicago",
     image: "@/assets/artist-4.jpg",
-    rating: 4.7
+    rating: 4.7,
+    price: 620
   }
 ];
 

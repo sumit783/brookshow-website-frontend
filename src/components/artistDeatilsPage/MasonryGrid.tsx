@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Play, ExternalLink, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
@@ -11,21 +11,31 @@ interface MediaItem {
 interface MasonryGridProps {
   images: string[];
   videos: string[];
+  pageSize?: number;
 }
 
-export const MasonryGrid = ({ images, videos }: MasonryGridProps) => {
+export const MasonryGrid = ({ images, videos, pageSize = 12 }: MasonryGridProps) => {
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Combine and shuffle media items
-  const mediaItems: MediaItem[] = [
-    ...images.map((src, idx) => ({ src, type: 'image' as const, id: `img-${idx}` })),
-    ...videos.map((src, idx) => ({ src, type: 'video' as const, id: `vid-${idx}` }))
-  ].sort(() => Math.random() - 0.5);
+  // Combine and shuffle media items once per images/videos change
+  const mediaItems: MediaItem[] = useMemo(() => {
+    const combined: MediaItem[] = [
+      ...images.map((src, idx) => ({ src, type: 'image' as const, id: `img-${idx}` })),
+      ...videos.map((src, idx) => ({ src, type: 'video' as const, id: `vid-${idx}` }))
+    ];
+    return combined.sort(() => Math.random() - 0.5);
+  }, [images, videos]);
+
+  const totalPages = Math.max(1, Math.ceil(mediaItems.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIdx = (safePage - 1) * pageSize;
+  const pageItems = mediaItems.slice(startIdx, startIdx + pageSize);
 
   return (
     <>
       <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
-        {mediaItems.map((item, idx) => (
+        {pageItems.map((item, idx) => (
           <div 
             key={item.id}
             className="break-inside-avoid relative group cursor-pointer overflow-hidden rounded-lg border border-white/10 hover:border-accent/30 transition-all duration-300"
@@ -35,7 +45,7 @@ export const MasonryGrid = ({ images, videos }: MasonryGridProps) => {
               <div className="relative">
                 <img
                   src={item.src}
-                  alt={`Portfolio ${idx + 1}`}
+                  alt={`Portfolio ${startIdx + idx + 1}`}
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                   style={{ height: `${200 + Math.random() * 200}px` }}
                 />
@@ -49,7 +59,7 @@ export const MasonryGrid = ({ images, videos }: MasonryGridProps) => {
               <div className="relative">
                 <img
                   src={item.src}
-                  alt={`Video ${idx + 1}`}
+                  alt={`Video ${startIdx + idx + 1}`}
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                   style={{ height: `${250 + Math.random() * 150}px` }}
                 />
@@ -68,6 +78,42 @@ export const MasonryGrid = ({ images, videos }: MasonryGridProps) => {
           </div>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-center gap-2">
+          <button
+            className="px-3 py-1 rounded-md border border-white/10 hover:bg-white/10 disabled:opacity-50"
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={safePage === 1}
+          >
+            Prev
+          </button>
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                className={
+                  "w-8 h-8 rounded-md text-sm border transition-colors " +
+                  (page === safePage
+                    ? "bg-white/20 border-white/30"
+                    : "border-white/10 hover:bg-white/10")
+                }
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+          <button
+            className="px-3 py-1 rounded-md border border-white/10 hover:bg-white/10 disabled:opacity-50"
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={safePage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Media Viewer Dialog */}
       <Dialog open={!!selectedMedia} onOpenChange={() => setSelectedMedia(null)}>

@@ -14,9 +14,10 @@ interface ProfileHeaderProps {
   rating: number;
   location: string;
   stats: Stats;
+  price?: number;
 }
 
-export const ProfileHeader = ({ image, name, category, rating, location, stats }: ProfileHeaderProps) => {
+export const ProfileHeader = ({ image, name, category, rating, location, stats, price }: ProfileHeaderProps) => {
   return (
     <div className="flex items-start gap-6">
       <div className="relative">
@@ -48,6 +49,11 @@ export const ProfileHeader = ({ image, name, category, rating, location, stats }
         <div className="flex items-center gap-2 mb-6">
           <MapPin className="w-5 h-5 text-accent" />
           <span className="text-foreground/80 text-lg">{location}</span>
+          {typeof price === 'number' && (
+            <Badge className="ml-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/40 text-green-300">
+              From ${price}
+            </Badge>
+          )}
         </div>
 
         <div className="flex gap-8 text-center">

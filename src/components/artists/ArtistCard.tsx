@@ -7,6 +7,7 @@ type Artist = {
   city: string;
   image: string;
   rating: number;
+  price?: number;
 };
 
 type ArtistCardProps = {
@@ -40,10 +41,18 @@ export const ArtistCard: React.FC<ArtistCardProps> = ({ artist, index = 0, onVie
             <span className="text-white/90 font-medium bg-white/10 px-3 py-1 rounded-full text-sm">{artist.talent}</span>
             <span className="text-white/80 text-sm">{artist.city}</span>
           </div>
+          
         </div>
       </div>
 
-      <div className="p-5">
+      <div className="px-5 py-4 flex items-center justify-between flex-col gap-2">
+      {typeof artist.price === 'number' && (
+            <div className="w-full">
+              <span className="w-full justify-center inline-flex items-center px-2.5 py-0.5 rounded-full text-2xl font-semibold ">
+                From <span className="text-accent ml-2"> ${artist.price}</span>
+              </span>
+            </div>
+          )}
         {/* Keeping button for visual parity and accessibility; click handled on container too */}
         <button className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-strong hover:from-accent hover:to-primary h-11 px-8"
           onClick={(e) => { e.stopPropagation(); onViewProfile(artist.id); }}

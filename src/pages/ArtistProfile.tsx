@@ -26,6 +26,7 @@ const artistsData = {
     image: artist1,
     specialties: ["House", "Techno", "Progressive"],
     bio: "Luna Eclipse is a renowned electronic DJ with over 8 years of experience in creating unforgettable musical experiences. Known for seamless mixing and high-energy performances that keep crowds dancing all night long. Her unique style blends progressive house with techno elements, creating an atmosphere that transcends ordinary club experiences.",
+    price: 750,
     socialMedia: {
       instagram: "https://instagram.com/lunaeclipse",
       twitter: "https://twitter.com/lunaeclipse",
@@ -49,6 +50,7 @@ const artistsData = {
     image: artist2,
     specialties: ["Rock", "Blues", "Alternative"],
     bio: "Marcus Stone brings raw energy and masterful guitar skills to every performance. A Nashville native with deep roots in blues and rock, he delivers powerful performances that resonate with audiences of all ages. His guitar work has been featured in numerous albums and live performances across the country.",
+    price: 600,
     socialMedia: {
       instagram: "https://instagram.com/marcusstone",
       twitter: "https://twitter.com/marcusstone",
@@ -72,6 +74,7 @@ const artistsData = {
     image: artist3,
     specialties: ["Jazz", "Soul", "R&B"],
     bio: "Sophia Grace possesses a voice that can move souls and captivate hearts. With perfect pitch and emotional depth, she brings classic jazz and modern R&B to life in ways that leave audiences spellbound. Her performances are intimate yet powerful, creating connections that last long after the final note.",
+    price: 820,
     socialMedia: {
       instagram: "https://instagram.com/sophiagrace",
       twitter: "https://twitter.com/sophiagrace",
@@ -95,6 +98,7 @@ const artistsData = {
     image: artist4,
     specialties: ["EDM", "Synthwave", "Ambient"],
     bio: "Digital Nexus is a cutting-edge music producer specializing in electronic soundscapes that transport listeners to another dimension. Known for innovative beats and atmospheric compositions that define modern electronic music. His productions have topped electronic charts and been featured in major festivals worldwide.",
+    price: 500,
     socialMedia: {
       instagram: "https://instagram.com/digitalnexus",
       twitter: "https://twitter.com/digitalnexus",
@@ -177,6 +181,7 @@ const ArtistProfile = () => {
                       rating={artist.rating}
                       location={artist.location}
                       stats={artist.stats}
+                      price={artist.price}
                     />
                   </CardHeader>
                   
@@ -196,7 +201,7 @@ const ArtistProfile = () => {
 
               {/* Booking Calendar */}
               <div>
-                <BookingCalendar artistName={artist.name} />
+                <BookingCalendar artistName={artist.name} price={artist.price} />
               </div>
             </div>
           </div>
@@ -221,15 +226,15 @@ const ArtistProfile = () => {
           </div>
         </section>
 
-        {/* Recommended Artists */}
+        {/* Similar Artists */}
         <section className="py-16 md:py-20 px-4 sm:px-6">
           <div className="container mx-auto max-w-7xl">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
-                Recommended Artists
+                Similar Artists
               </h2>
               <p className="text-xl text-muted-foreground">
-                You may also like these similar performers
+                You may also like these similar artists
               </p>
             </div>
 

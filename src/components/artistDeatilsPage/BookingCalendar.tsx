@@ -7,9 +7,10 @@ import { Clock, CheckCircle } from "lucide-react";
 
 interface BookingCalendarProps {
   artistName: string;
+  price?: number;
 }
 
-export const BookingCalendar = ({ artistName }: BookingCalendarProps) => {
+export const BookingCalendar = ({ artistName, price }: BookingCalendarProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string>("");
 
@@ -45,7 +46,14 @@ export const BookingCalendar = ({ artistName }: BookingCalendarProps) => {
         <CardTitle className="text-xl font-bold bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
           Book {artistName}
         </CardTitle>
-        <p className="text-muted-foreground">Select a date and time for your event</p>
+        <div className="flex items-center justify-between">
+          <p className="text-muted-foreground">Select a date and time for your event</p>
+          {typeof price === 'number' && (
+            <Badge variant="outline" className="bg-green-500/10 text-green-300 border-green-400/30">
+              From ${price}
+            </Badge>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Calendar */}
@@ -120,6 +128,11 @@ export const BookingCalendar = ({ artistName }: BookingCalendarProps) => {
               })} 
               at {selectedTime}
             </div>
+            {typeof price === 'number' && (
+              <div className="mt-2 text-sm text-foreground/80">
+                Estimated price: <span className="font-semibold">${price}</span>
+              </div>
+            )}
           </div>
         )}
 
