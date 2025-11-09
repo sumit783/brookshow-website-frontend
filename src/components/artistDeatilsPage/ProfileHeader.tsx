@@ -46,11 +46,13 @@ export const ProfileHeader = ({ image, name, category, rating, location, stats, 
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mb-6">
+        <div className="flex justify-between items-center gap-2 mb-6">
+          <div className="flex items-center gap-2">
           <MapPin className="w-5 h-5 text-accent" />
           <span className="text-foreground/80 text-lg">{location}</span>
+          </div>
           {typeof price === 'number' && (
-            <Badge className="ml-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/40 text-green-300">
+            <Badge className="ml-3 text-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/40 text-green-300">
               From ${price}
             </Badge>
           )}

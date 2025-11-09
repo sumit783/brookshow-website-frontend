@@ -48,11 +48,11 @@ export const BookingCalendar = ({ artistName, price }: BookingCalendarProps) => 
         </CardTitle>
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground">Select a date and time for your event</p>
-          {typeof price === 'number' && (
+          {/* {typeof price === 'number' && (
             <Badge variant="outline" className="bg-green-500/10 text-green-300 border-green-400/30">
               From ${price}
             </Badge>
-          )}
+          )} */}
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
