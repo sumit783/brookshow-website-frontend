@@ -12,11 +12,11 @@ export const HeroSection = () => {
       {/* Hero Content */}
       <div className="relative z-10 text-center max-w-5xl mx-auto px-6">
         <div className="glass-modern rounded-3xl p-16 shadow-strong backdrop-blur-xl fade-in-scale">
-          <h1 className="text-6xl font-bold font-heading mb-8 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent leading-tight">
+          <h1 className="text-6xl font-hero mb-8 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent leading-tight">
             Empowering Talents, Ensuring Trust
           </h1>
           
-          <p className="text-2xl md:text-3xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-white mb-12 max-w-3xl mx-auto leading-relaxed font-medium">
             Discover & book trusted Artists, DJs, Event Planners & more
           </p>
           
