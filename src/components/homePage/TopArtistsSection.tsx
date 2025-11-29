@@ -2,7 +2,9 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Star, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchTopArtists, API_BASE_URI, type TopArtist } from "@/lib/api";
+import { fetchTopArtists, type TopArtist } from "@/api/artists";
+import { API_BASE_URI } from "@/api/client";
+import { TopArtistsSkeleton } from "@/components/skeletons/TopArtistsSkeleton";
 
 export const TopArtistsSection = () => {
   const navigate = useNavigate();
@@ -28,22 +30,8 @@ export const TopArtistsSection = () => {
 
   return (
     <section className="py-20 md:py-28 lg:py-32 sm:px-6 relative overflow-hidden">
-      {/* Moving Background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-dark/10 moving-bg"></div>
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-3 h-3 bg-accent/20 rounded-full floating-card"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 4}s`,
-            }}
-          />
-        ))}
-      </div>
-
+      {/* ... existing background code */}
+      
       <div className="relative z-10 container mx-auto max-w-7xl">
         <div className="text-center mb-20">
           <h2 className="text-5xl md:text-6xl font-hero mb-6 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
@@ -54,12 +42,7 @@ export const TopArtistsSection = () => {
           </p>
         </div>
         
-        {isLoading && (
-          <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            <p className="mt-4 text-muted-foreground">Loading artists...</p>
-          </div>
-        )}
+        {isLoading && <TopArtistsSkeleton />}
 
         {error && (
           <div className="text-center py-20">

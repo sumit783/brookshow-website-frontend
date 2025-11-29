@@ -1,0 +1,14 @@
+import axios from 'axios';
+
+export const API_BASE_URI = import.meta.env.VITE_API_BASE_URI || 'http://localhost:5000';
+const API_KEY = import.meta.env.VITE_API_KEY || "gLzOQGmoJk4b92oJcisx3y4KMFcecp";
+
+const client = axios.create({
+  baseURL: API_BASE_URI,
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': API_KEY,
+  },
+});
+
+export default client;

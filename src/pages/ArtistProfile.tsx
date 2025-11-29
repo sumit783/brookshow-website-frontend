@@ -10,7 +10,11 @@ import { MasonryGrid } from "@/components/artistDeatilsPage/MasonryGrid";
 import { ProfileHeader } from "@/components/artistDeatilsPage/ProfileHeader";
 import { AboutSection } from "@/components/artistDeatilsPage/AboutSection";
 import { Specialties } from "@/components/artistDeatilsPage/Specialties";
-import { fetchArtistProfile, API_BASE_URI, type ArtistProfile } from "@/lib/api";
+import { fetchArtistProfile, type ArtistProfile, fetchSimilarArtists, type SimilarArtist } from "@/api/artists";
+import { API_BASE_URI } from "@/api/client";
+import { ArtistProfileSkeleton } from "@/components/skeletons/ArtistProfileSkeleton";
+import { ArtistCard } from "@/components/artists/ArtistCard";
+import { SimilarArtistsSkeleton } from "@/components/skeletons/SimilarArtistsSkeleton";
 
 const ArtistProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +23,12 @@ const ArtistProfile = () => {
   const { data: artistData, isLoading, error } = useQuery({
     queryKey: ['artistProfile', id],
     queryFn: () => fetchArtistProfile(id!),
+    enabled: !!id,
+  });
+
+  const { data: similarArtistsData, isLoading: isLoadingSimilar, error: similarArtistsError } = useQuery({
+    queryKey: ['similarArtists', id],
+    queryFn: () => fetchSimilarArtists(id!),
     enabled: !!id,
   });
 
@@ -36,20 +46,8 @@ const ArtistProfile = () => {
     return `${API_BASE_URI}/${imagePath}`;
   };
 
-  // Scroll to top on route mount
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-  }, []);
-
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-          <p className="text-muted-foreground">Loading artist profile...</p>
-        </div>
-      </div>
-    );
+    return <ArtistProfileSkeleton />;
   }
 
   if (error || !artistData || !artistData.success) {
@@ -127,7 +125,7 @@ const ArtistProfile = () => {
 
               {/* Booking Calendar */}
               <div>
-                <BookingCalendar artistName={artist.name} price={artist.price} />
+                <BookingCalendar artistName={artist.name} price={artist.price} artistId={artist.id} />
               </div>
             </div>
           </div>
@@ -158,7 +156,7 @@ const ArtistProfile = () => {
           </div>
         </section>
 
-        {/* Similar Artists - Coming Soon */}
+        {/* Similar Artists */}
         <section className="py-16 md:py-20 px-4 sm:px-6">
           <div className="container mx-auto max-w-7xl">
             <div className="text-center mb-12">
@@ -170,9 +168,39 @@ const ArtistProfile = () => {
               </p>
             </div>
 
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Similar artists feature coming soon</p>
-            </div>
+            {isLoadingSimilar && <SimilarArtistsSkeleton />}
+
+            {similarArtistsError && (
+              <div className="text-center py-12">
+                <p className="text-destructive">Failed to load similar artists. Please try again later.</p>
+              </div>
+            )}
+
+            {similarArtistsData?.success && similarArtistsData.artists && similarArtistsData.artists.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                {similarArtistsData.artists.map((similarArtist: SimilarArtist) => (
+                  <ArtistCard 
+                    key={similarArtist.id}
+                    artist={{
+                      id: similarArtist.id,
+                      name: similarArtist.name,
+                      image: getImageUrl(similarArtist.image),
+                      talent: similarArtist.category, // Map category to talent
+                      rating: similarArtist.rating,
+                      city: similarArtist.location, // Map location to city
+                      price: similarArtist.price,
+                    }}
+                    onViewProfile={(artistId) => navigate(`/artists/${artistId}`)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {similarArtistsData?.success && (!similarArtistsData.artists || similarArtistsData.artists.length === 0) && !isLoadingSimilar && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No similar artists found.</p>
+              </div>
+            )}
           </div>
         </section>
       </div>

@@ -4,15 +4,34 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, CheckCircle } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchArtistServices, type ArtistService, checkArtistAvailability } from "@/api/artists";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface BookingCalendarProps {
   artistName: string;
   price?: number;
+  artistId: string;
 }
 
-export const BookingCalendar = ({ artistName, price }: BookingCalendarProps) => {
+export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendarProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string>("");
+  const [selectedService, setSelectedService] = useState<ArtistService | undefined>(undefined);
+
+  const { data: servicesData, isLoading: isLoadingServices, error: servicesError } = useQuery({
+    queryKey: ['artistServices', artistId],
+    queryFn: () => fetchArtistServices(artistId),
+    enabled: !!artistId,
+  });
+
+  const formattedDate = selectedDate ? selectedDate.toISOString().split('T')[0] : '';
+
+  const { data: availabilityData, isLoading: isLoadingAvailability } = useQuery({
+    queryKey: ['artistAvailability', artistId, selectedService?.id, formattedDate, selectedTime],
+    queryFn: () => checkArtistAvailability(artistId, selectedService!.id, formattedDate, selectedTime),
+    enabled: !!artistId && !!selectedService && !!selectedDate && !!selectedTime,
+  });
 
   // Mock available time slots
   const timeSlots = [
@@ -33,10 +52,23 @@ export const BookingCalendar = ({ artistName, price }: BookingCalendarProps) => 
   };
 
   const handleBooking = () => {
-    if (selectedDate && selectedTime) {
+    if (selectedDate && selectedTime && selectedService && availabilityData?.available) {
       // Handle booking logic here
-      console.log('Booking:', { date: selectedDate, time: selectedTime, artist: artistName });
-      alert(`Booking request sent for ${selectedDate.toDateString()} at ${selectedTime}`);
+      const totalAmount = selectedService.price_for_user;
+      const advanceAmount = selectedService.advance;
+      console.log('Booking:', { 
+        date: selectedDate, 
+        time: selectedTime, 
+        artist: artistName, 
+        service: selectedService,
+        totalAmount: totalAmount,
+        advanceAmount: advanceAmount,
+      });
+      alert(`Booking request sent for ${selectedService.category} on ${selectedDate.toDateString()} at ${selectedTime}. Total: ₹${totalAmount.toLocaleString('en-IN')}, Advance: ₹${advanceAmount.toLocaleString('en-IN')}`);
+    } else if (!availabilityData?.available) {
+      alert("Artist is not available for the selected time slot.");
+    } else if (!selectedService) {
+      alert("Please select a service.");
     }
   };
 
@@ -56,6 +88,30 @@ export const BookingCalendar = ({ artistName, price }: BookingCalendarProps) => 
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Service Selection */}
+        {isLoadingServices && <p>Loading services...</p>}
+        {servicesError && <p className="text-destructive">Failed to load services.</p>}
+        {servicesData?.success && servicesData.services.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Select a Service</h4>
+            <Select onValueChange={(value) => {
+              const service = servicesData.services.find(s => s.id === value);
+              setSelectedService(service);
+            }}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a service" />
+              </SelectTrigger>
+              <SelectContent>
+                {servicesData.services.map((service) => (
+                  <SelectItem key={service.id} value={service.id}>
+                    {service.category} - ₹{service.price_for_user.toLocaleString('en-IN')}/{service.unit}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         {/* Calendar */}
         <div className="flex justify-center">
           <Calendar
@@ -128,21 +184,42 @@ export const BookingCalendar = ({ artistName, price }: BookingCalendarProps) => 
               })} 
               at {selectedTime}
             </div>
-            {typeof price === 'number' && (
+            {typeof (selectedService?.price_for_user || price) === 'number' && (
               <div className="mt-2 text-sm text-foreground/80">
-                Estimated price: <span className="font-semibold">${price}</span>
+                Estimated price: <span className="font-semibold">₹{(selectedService?.price_for_user || price || 0).toLocaleString('en-IN')}</span>
+                {selectedService && (
+                  <div className="mt-1">
+                    <p>Total Price: <span className="font-semibold">₹{selectedService.price_for_user.toLocaleString('en-IN')}</span></p>
+                    <p>Advance Payment: <span className="font-semibold">₹{selectedService.advance.toLocaleString('en-IN')}</span></p>
+                  </div>
+                )}
               </div>
+            )}
+
+            {/* Availability Status */}
+            {selectedService && selectedDate && selectedTime && (
+              isLoadingAvailability ? (
+                <p className="text-muted-foreground mt-2">Checking availability...</p>
+              ) : availabilityData?.success ? (
+                availabilityData.available ? (
+                  <Badge className="mt-2 bg-green-500/10 text-green-300 border-green-400/30">Available</Badge>
+                ) : (
+                  <Badge className="mt-2 bg-red-500/10 text-red-300 border-red-400/30">Not Available</Badge>
+                )
+              ) : (
+                <p className="text-destructive mt-2">Failed to check availability.</p>
+              )
             )}
           </div>
         )}
 
         {/* Booking Button */}
-        {selectedDate && selectedTime && (
+        {selectedDate && selectedTime && selectedService && availabilityData?.available && (
           <Button 
             onClick={handleBooking}
             className="w-full h-12 text-base font-bold bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary transition-all duration-500"
           >
-            Confirm Booking
+            Book Artist
           </Button>
         )}
 

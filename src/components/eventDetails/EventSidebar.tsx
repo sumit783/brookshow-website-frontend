@@ -6,12 +6,11 @@ interface EventSidebarProps {
   date: string;
   time: string;
   doors: string;
-  attendance: string;
   location: string;
   onGetTickets: () => void;
 }
 
-export const EventSidebar = ({ price, date, time, doors, attendance, location, onGetTickets }: EventSidebarProps) => {
+export const EventSidebar = ({ price, date, time, doors, location, onGetTickets }: EventSidebarProps) => {
   return (
     <div className="space-y-6">
       <div className="glass-modern p-6 rounded-2xl sticky top-6">
@@ -40,13 +39,13 @@ export const EventSidebar = ({ price, date, time, doors, attendance, location, o
             <p className="text-sm text-muted-foreground">Doors: {doors}</p>
           </div>
 
-          <div className="bg-muted/20 rounded-xl p-4 border border-white/10">
+          {/* <div className="bg-muted/20 rounded-xl p-4 border border-white/10">
             <div className="flex items-center gap-3 mb-2">
               <Users className="w-5 h-5 text-accent" />
               <span className="text-xs text-muted-foreground uppercase">Attending</span>
             </div>
             <p className="font-bold text-foreground">{attendance}</p>
-          </div>
+          </div> */}
 
           <div className="bg-muted/20 rounded-xl p-4 border border-white/10">
             <div className="flex items-center gap-3 mb-2">
