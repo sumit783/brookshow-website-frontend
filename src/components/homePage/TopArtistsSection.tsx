@@ -1,56 +1,31 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Star, MapPin, Calendar } from "lucide-react";
-import artist1 from "@/assets/artist-1.jpg";
-import artist2 from "@/assets/artist-2.jpg";
-import artist3 from "@/assets/artist-3.jpg";
-import artist4 from "@/assets/artist-4.jpg";
-
-const topArtists = [
-  {
-    id: 1,
-    name: "Luna Eclipse",
-    category: "Electronic DJ",
-    rating: 4.9,
-    location: "Los Angeles, CA",
-    image: artist1,
-    specialties: ["House", "Techno"],
-    price: 750
-  },
-  {
-    id: 2,
-    name: "Marcus Stone",
-    category: "Rock Guitarist",
-    rating: 4.8,
-    location: "Nashville, TN",
-    image: artist2,
-    specialties: ["Rock", "Blues", "Alternative"],
-    price: 600
-  },
-  {
-    id: 3,
-    name: "Sophia Grace",
-    category: "Vocalist",
-    rating: 5.0,
-    location: "New York, NY",
-    image: artist3,
-    specialties: ["Jazz", "Soul", "R&B"],
-    price: 820
-  },
-  {
-    id: 4,
-    name: "Digital Nexus",
-    category: "Producer",
-    rating: 4.7,
-    location: "Miami, FL",
-    image: artist4,
-    specialties: ["EDM", "Synthwave", "Ambient"],
-    price: 500
-  }
-];
+import { Star, MapPin } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchTopArtists, API_BASE_URI, type TopArtist } from "@/lib/api";
 
 export const TopArtistsSection = () => {
   const navigate = useNavigate();
+  
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['topArtists'],
+    queryFn: fetchTopArtists,
+  });
+
+  // Helper function to get full image URL
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return '';
+    // If it's already a full URL, return as is
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    // If it starts with /, it's a relative path from the base URI
+    if (imagePath.startsWith('/')) {
+      return `${API_BASE_URI}${imagePath}`;
+    }
+    return `${API_BASE_URI}/${imagePath}`;
+  };
+
   return (
     <section className="py-20 md:py-28 lg:py-32 sm:px-6 relative overflow-hidden">
       {/* Moving Background */}
@@ -79,8 +54,22 @@ export const TopArtistsSection = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-16 items-stretch">
-          {topArtists.map((artist, index) => (
+        {isLoading && (
+          <div className="text-center py-20">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <p className="mt-4 text-muted-foreground">Loading artists...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="text-center py-20">
+            <p className="text-destructive">Failed to load artists. Please try again later.</p>
+          </div>
+        )}
+
+        {data?.success && data.artists && data.artists.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-16 items-stretch">
+            {data.artists.map((artist: TopArtist, index: number) => (
             <div 
               key={artist.id}
               className="group relative fade-in-scale h-full"
@@ -95,9 +84,13 @@ export const TopArtistsSection = () => {
                 {/* Image Section */}
                 <div className="relative overflow-hidden h-48 flex-shrink-0">
                   <img
-                    src={artist.image}
+                    src={getImageUrl(artist.image)}
                     alt={artist.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    onError={(e) => {
+                      // Fallback to a placeholder if image fails to load
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Artist';
+                    }}
                   />
                   
                   {/* Gradient Overlay */}
@@ -156,7 +149,7 @@ export const TopArtistsSection = () => {
                   <div className="relative z-10">
                     <div className="flex items-baseline gap-2 pb-4 border-b border-border">
                       <span className="text-2xl font-bold text-primary font-heading">
-                        ₹{(artist.price * 83).toLocaleString('en-IN')}
+                        ₹{artist.price.toLocaleString('en-IN')}
                       </span>
                       <span className="text-sm text-muted-foreground">/event</span>
                     </div>
@@ -179,8 +172,15 @@ export const TopArtistsSection = () => {
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-accent to-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
               </div>
             </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {data?.success && (!data.artists || data.artists.length === 0) && (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground">No artists available at the moment.</p>
+          </div>
+        )}
         
         <div className="text-center">
           <Button onClick={() => navigate("/artists")} variant="outline" size="xl" className="glass-modern hover-neon">
