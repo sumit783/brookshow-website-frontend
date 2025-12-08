@@ -150,7 +150,7 @@ const Events = () => {
                     category: event.category || "Other",
                   }}
                   index={index}
-                  onViewDetails={(id) => navigate(`/events/${id}`)}
+                  onViewDetails={(id) => navigate(`/events/${event.id}`)}
                 />
               </div>
             ))}

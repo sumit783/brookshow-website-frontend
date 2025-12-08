@@ -1,9 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import RecommendedEvents from "@/components/eventDetails/RecommendedEvents";
-import ticket1 from "@/assets/ticket-1.jpg";
-import ticket2 from "@/assets/ticket-2.jpg";
-import ticket3 from "@/assets/ticket-3.jpg";
 import { EventHero } from "@/components/eventDetails/EventHero";
 import { EventMainContent } from "@/components/eventDetails/EventMainContent";
 import { EventSidebar } from "@/components/eventDetails/EventSidebar";
@@ -12,6 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchEventDetails, type EventDetailsResponse } from "@/api/events";
 import { API_BASE_URI } from "@/api/client";
 import { EventDetailsSkeleton } from "@/components/skeletons/EventDetailsSkeleton";
+import { buyTicket } from "@/api/tickets";
+import { toast } from "sonner";
 
 
 export default function EventDetails() {
@@ -102,9 +101,34 @@ export default function EventDetails() {
         onClose={() => setOpenDialog(false)}
         unitPrice={parseFloat(String(event.price).replace(/[^0-9.]/g, "")) || 0}
         currency={(event.price || "").replace(/[0-9.\s]/g, "") || "₹"}
-        onPayNow={(data) => {
-          console.log("Pay Now:", data);
-          setOpenDialog(false);
+        onPayNow={async (data) => {
+          const token = localStorage.getItem("token");
+          if (!token) {
+              toast.error("Please sign in to buy tickets");
+              navigate("/signin");
+              return;
+          }
+
+          try {
+             // Using hardcoded ticketTypeId as requested for demo/MVP
+             const response = await buyTicket({
+                 ticketTypeId: "692aa0cd5f941f46bb22604b",
+                 quantity: data.persons,
+                 buyerName: data.name,
+                 buyerPhone: data.phone.replace("+91 ", "") // Extract number only
+             });
+
+             if (response.success) {
+                 toast.success(response.message || "Ticket purchased successfully");
+                 setOpenDialog(false);
+                 navigate(`/ticket/${response.ticket._id}`);
+             } else {
+                 toast.error(response.message || "Failed to purchase ticket");
+             }
+          } catch (error: any) {
+              console.error("Purchase error:", error);
+              toast.error(error.response?.data?.message || "An error occurred while purchasing");
+          }
         }}
       />
     </div>

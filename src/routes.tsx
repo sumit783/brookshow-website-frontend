@@ -7,10 +7,17 @@ import EventDetails from "@/pages/EventDetails";
 import Artists from "./pages/Artists";
 import Events from "./pages/Events";
 import Contact from "./pages/Contact";
+import TicketDetails from "@/pages/TicketDetails";
+import SignUp from "@/pages/SignUp";
+import SignIn from "@/pages/SignIn";
+import Profile from "@/pages/Profile";
 
 export const AppRoutes = () => {
   return (
     <Routes>
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/signin" element={<SignIn />} />
+      <Route path="ticket/:id" element={<TicketDetails />} />
       <Route path="/" element={<Layout />}>
         <Route index element={<Index />} />
         <Route path="artists" element={<Artists />} />
@@ -18,6 +25,9 @@ export const AppRoutes = () => {
         <Route path="contact" element={<Contact />} />
         <Route path="artists/:id" element={<ArtistProfile />} />
         <Route path="events/:id" element={<EventDetails />} />
+        
+        <Route path="profile" element={<Profile />} />
+
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
