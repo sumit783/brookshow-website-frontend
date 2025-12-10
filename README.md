@@ -50,6 +50,8 @@ npm run dev
 ## Project Structure
 
 ```
+
+
 src/
 ├── components/          # Reusable UI components
 │   ├── ui/             # shadcn/ui components
