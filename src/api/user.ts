@@ -29,11 +29,26 @@ export interface TicketSummary {
     isValid: boolean;
 }
 
+export interface BookingSummary {
+    id: string;
+    artist: {
+        id: string;
+        name: string;
+        image: string;
+        category: string[];
+    };
+    service: string;
+    date: string;
+    startDate?: string;
+    endDate?: string;
+    status: string;
+}
+
 export interface UserProfileResponse {
     success: boolean;
     user: UserProfile;
     tickets: TicketSummary[];
-    bookings: any[]; // Define booking interface if needed later
+    bookings: BookingSummary[];
 }
 
 export const fetchUserProfile = async (): Promise<UserProfileResponse> => {

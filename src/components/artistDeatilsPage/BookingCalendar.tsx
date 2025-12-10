@@ -1,12 +1,16 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, CheckCircle } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchArtistServices, type ArtistService, checkArtistAvailability } from "@/api/artists";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { fetchArtistServices, type ArtistService, checkArtistAvailability, fetchBookingPrice, bookArtist } from "@/api/artists";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface BookingCalendarProps {
   artistName: string;
@@ -15,9 +19,14 @@ interface BookingCalendarProps {
 }
 
 export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendarProps) => {
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedService, setSelectedService] = useState<ArtistService | undefined>(undefined);
+  const [endDate, setEndDate] = useState<string>("");
+  const [endTime, setEndTime] = useState<string>("");
+  const [eventName, setEventName] = useState<string>("");
+  const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
 
   const { data: servicesData, isLoading: isLoadingServices, error: servicesError } = useQuery({
     queryKey: ['artistServices', artistId],
@@ -51,28 +60,66 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
     );
   };
 
-  const handleBooking = () => {
-    if (selectedDate && selectedTime && selectedService && availabilityData?.available) {
-      // Handle booking logic here
-      const totalAmount = selectedService.price_for_user;
-      const advanceAmount = selectedService.advance;
-      console.log('Booking:', { 
-        date: selectedDate, 
-        time: selectedTime, 
-        artist: artistName, 
-        service: selectedService,
-        totalAmount: totalAmount,
-        advanceAmount: advanceAmount,
-      });
-      alert(`Booking request sent for ${selectedService.category} on ${selectedDate.toDateString()} at ${selectedTime}. Total: ₹${totalAmount.toLocaleString('en-IN')}, Advance: ₹${advanceAmount.toLocaleString('en-IN')}`);
-    } else if (!availabilityData?.available) {
-      alert("Artist is not available for the selected time slot.");
-    } else if (!selectedService) {
-      alert("Please select a service.");
+  const startDateIso = selectedDate && selectedTime
+    ? new Date(`${formattedDate}T${selectedTime}`).toISOString()
+    : null;
+
+  const endDateIso = endDate && endTime
+    ? new Date(`${endDate}T${endTime}`).toISOString()
+    : null;
+
+  const {
+    data: priceData,
+    isFetching: isFetchingPrice,
+    error: priceError,
+  } = useQuery({
+    queryKey: ['bookingPriceRange', artistId, selectedService?.id || '690f3db5c1c7c8c6abe0cb2e', startDateIso, endDateIso],
+    queryFn: () => fetchBookingPrice(
+      artistId,
+      (selectedService?.id || '690f3db5c1c7c8c6abe0cb2e'),
+      startDateIso!,
+      endDateIso!,
+    ),
+    enabled: !!artistId && !!selectedService && !!startDateIso && !!endDateIso,
+    retry: false,
+  });
+
+  const bookArtistMutation = useMutation({
+    mutationFn: () => bookArtist(artistId, {
+      serviceId: selectedService?.id || '690f3db5c1c7c8c6abe0cb2e',
+      startDate: startDateIso!,
+      endDate: endDateIso!,
+      eventName: eventName || "Event",
+    }),
+    onSuccess: (resp) => {
+      alert(resp.message || "Booking confirmed.");
+      setIsBookingDialogOpen(false);
+      navigate("/profile");
+    },
+    onError: () => {
+      alert("Failed to place booking. Please try again.");
+    },
+  });
+
+  const handleBookArtist = () => {
+    if (!selectedService || !startDateIso || !endDateIso || !priceData?.success) return;
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/signin", { state: { redirectTo: window.location.pathname } });
+      return;
     }
+    setIsBookingDialogOpen(true);
   };
 
+  const handleConfirmBooking = () => {
+    if (!selectedService || !startDateIso || !endDateIso) return;
+    bookArtistMutation.mutate();
+  };
+
+  const isBookingInFlight = bookArtistMutation.status === "pending";
+
   return (
+    <>
     <Card className="bg-gradient-to-br from-background/95 to-background/90 backdrop-blur-xl border border-white/10">
       <CardHeader>
         <CardTitle className="text-xl font-bold bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
@@ -171,56 +218,92 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
           </div>
         )}
 
-        {/* Selected Summary (date + time) */}
-        {selectedDate && selectedTime && (
-          <div className="text-center p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg border border-accent/30">
-            <div className="font-semibold mb-1">Selected</div>
-            <div className="text-lg">
-              {selectedDate.toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })} 
-              at {selectedTime}
+
+        {/* End date/time inputs */}
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="endDate">End Date</Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={endDate}
+                min={formattedDate || new Date().toISOString().split('T')[0]}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
             </div>
-            {typeof (selectedService?.price_for_user || price) === 'number' && (
-              <div className="mt-2 text-sm text-foreground/80">
-                Estimated price: <span className="font-semibold">₹{(selectedService?.price_for_user || price || 0).toLocaleString('en-IN')}</span>
-                {selectedService && (
-                  <div className="mt-1">
-                    <p>Total Price: <span className="font-semibold">₹{selectedService.price_for_user.toLocaleString('en-IN')}</span></p>
-                    <p>Advance Payment: <span className="font-semibold">₹{selectedService.advance.toLocaleString('en-IN')}</span></p>
+            <div className="space-y-2">
+              <Label htmlFor="endTime">End Time</Label>
+              <Input
+                id="endTime"
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Price & Availability Result */}
+        {(isFetchingPrice || priceData || priceError) && (
+          <div className="p-4 rounded-lg border border-accent/30 bg-accent/10 space-y-3">
+            {isFetchingPrice && (
+              <p className="text-muted-foreground">Checking availability...</p>
+            )}
+            {priceError && (
+              <p className="text-destructive">Failed to fetch price. Please try again.</p>
+            )}
+            {priceData?.success && (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Availability:</span>
+                  <Badge className={priceData.available ? "bg-green-500/10 text-green-300 border-green-400/30" : "bg-red-500/10 text-red-300 border-red-400/30"}>
+                    {priceData.available ? "Available" : "Not available"}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Base Price:</span>
+                  <span className="font-semibold">₹{priceData.basePrice.toLocaleString('en-IN')} / {priceData.unit}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Total Price:</span>
+                  <span className="font-bold">₹{priceData.price.toLocaleString('en-IN')}</span>
+                </div>
+                {typeof priceData.advance === 'number' && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Advance:</span>
+                    <span className="font-semibold">₹{priceData.advance.toLocaleString('en-IN')}</span>
                   </div>
                 )}
-              </div>
-            )}
-
-            {/* Availability Status */}
-            {selectedService && selectedDate && selectedTime && (
-              isLoadingAvailability ? (
-                <p className="text-muted-foreground mt-2">Checking availability...</p>
-              ) : availabilityData?.success ? (
-                availabilityData.available ? (
-                  <Badge className="mt-2 bg-green-500/10 text-green-300 border-green-400/30">Available</Badge>
-                ) : (
-                  <Badge className="mt-2 bg-red-500/10 text-red-300 border-red-400/30">Not Available</Badge>
-                )
-              ) : (
-                <p className="text-destructive mt-2">Failed to check availability.</p>
-              )
+                {priceData.duration && (
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <div>Start: {new Date(priceData.duration.start).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
+                    <div>End: {new Date(priceData.duration.end).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
+                  </div>
+                )}
+                {priceData.message && (
+                  <p className="text-sm">{priceData.message}</p>
+                )}
+                {!priceData.available && priceData.conflicts && (
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    {priceData.conflicts.bookings?.length ? (
+                      <div>Conflicting bookings: {priceData.conflicts.bookings.length}</div>
+                    ) : null}
+                    {priceData.conflicts.calendarBlocks?.length ? (
+                      <div>Calendar blocks: {priceData.conflicts.calendarBlocks.length}</div>
+                    ) : null}
+                  </div>
+                )}
+                <Button
+                  className="w-full h-12 text-base font-bold bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary transition-all duration-500"
+                  disabled={!priceData.available}
+                  onClick={handleBookArtist}
+                >
+                  Book Artist
+                </Button>
+              </>
             )}
           </div>
-        )}
-
-        {/* Booking Button */}
-        {selectedDate && selectedTime && selectedService && availabilityData?.available && (
-          <Button 
-            onClick={handleBooking}
-            className="w-full h-12 text-base font-bold bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary transition-all duration-500"
-          >
-            Book Artist
-          </Button>
         )}
 
         {/* Legend */}
@@ -236,5 +319,33 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
         </div>
       </CardContent>
     </Card>
+    <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Enter Event Name</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <Label htmlFor="eventName">Event Name</Label>
+          <Input
+            id="eventName"
+            placeholder="e.g. Wedding Reception"
+            value={eventName}
+            onChange={(e) => setEventName(e.target.value)}
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsBookingDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmBooking}
+            disabled={isBookingInFlight}
+          >
+            {isBookingInFlight ? "Booking..." : "Confirm Booking"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 };

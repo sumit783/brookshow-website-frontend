@@ -11,6 +11,7 @@ import TicketDetails from "@/pages/TicketDetails";
 import SignUp from "@/pages/SignUp";
 import SignIn from "@/pages/SignIn";
 import Profile from "@/pages/Profile";
+import BookedArtist from "@/pages/BookedArtist";
 
 export const AppRoutes = () => {
   return (
@@ -25,7 +26,7 @@ export const AppRoutes = () => {
         <Route path="contact" element={<Contact />} />
         <Route path="artists/:id" element={<ArtistProfile />} />
         <Route path="events/:id" element={<EventDetails />} />
-        
+        <Route path="bookings/:id" element={<BookedArtist />} />
         <Route path="profile" element={<Profile />} />
 
         <Route path="*" element={<NotFound />} />
