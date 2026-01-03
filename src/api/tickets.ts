@@ -12,6 +12,12 @@ export interface PlannerProfile {
     logoUrl: string;
 }
 
+export interface EventTicketType {
+    id: string;
+    name: string;
+    price: number;
+}
+
 export interface Event {
     _id: string;
     plannerProfileId: PlannerProfile;
@@ -70,5 +76,15 @@ export interface BuyTicketResponse {
 
 export const buyTicket = async (data: BuyTicketData): Promise<BuyTicketResponse> => {
     const response = await client.post<BuyTicketResponse>('/api/user/buy-ticket', data);
+    return response.data;
+};
+
+export interface EventTicketTypesResponse {
+    success: boolean;
+    ticketTypes: EventTicketType[];
+}
+
+export const fetchEventTicketTypes = async (eventId: string): Promise<EventTicketTypesResponse> => {
+    const response = await client.get<EventTicketTypesResponse>(`/api/user/event/${eventId}/ticket-types`);
     return response.data;
 };

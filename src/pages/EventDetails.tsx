@@ -99,7 +99,7 @@ export default function EventDetails() {
       <TicketDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
-        unitPrice={parseFloat(String(event.price).replace(/[^0-9.]/g, "")) || 0}
+        eventId={event.id}
         currency={(event.price || "").replace(/[0-9.\s]/g, "") || "₹"}
         onPayNow={async (data) => {
           const token = localStorage.getItem("token");
@@ -110,9 +110,8 @@ export default function EventDetails() {
           }
 
           try {
-             // Using hardcoded ticketTypeId as requested for demo/MVP
              const response = await buyTicket({
-                 ticketTypeId: "692aa0cd5f941f46bb22604b",
+                 ticketTypeId: data.ticketTypeId,
                  quantity: data.persons,
                  buyerName: data.name,
                  buyerPhone: data.phone.replace("+91 ", "") // Extract number only

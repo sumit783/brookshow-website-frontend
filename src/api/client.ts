@@ -19,4 +19,20 @@ client.interceptors.request.use((config) => {
   return config;
 });
 
+client.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user"); // Clean up user data if exists
+      if (window.location.pathname !== '/signin') {
+        window.location.href = '/signin';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default client;

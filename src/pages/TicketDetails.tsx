@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Calendar, MapPin, User, Phone, Users, CheckCircle, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { API_BASE_URI } from "@/api/client";
 
 const TicketDetails = () => {
     const { id } = useParams<{ id: string }>();
@@ -57,6 +58,17 @@ const TicketDetails = () => {
 
     const { eventId, ticketTypeId, buyerName, buyerPhone, persons, qrDataUrl, scanned, isValide } = ticket;
 
+    const getImageUrl = (imagePath: string) => {
+        if (!imagePath) return '';
+        if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+            return imagePath;
+        }
+        if (imagePath.startsWith('/')) {
+            return `${API_BASE_URI}${imagePath}`;
+        }
+        return `${API_BASE_URI}/${imagePath}`;
+    };
+
     return (
         <div className="min-h-screen bg-background relative flex items-center justify-center p-4 overflow-hidden">
             {/* Animated Background Elements */}
@@ -81,9 +93,17 @@ const TicketDetails = () => {
                                 <Badge className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-md">
                                     {ticketTypeId.title} Experience
                                 </Badge>
-                                 {eventId.plannerProfileId?.logoUrl && (
-                                    <img src={eventId.plannerProfileId.logoUrl} alt="Organizer" className="h-10 w-10 rounded-full border-2 border-white/50" />
-                                )}
+                                 {/* {eventId.plannerProfileId?.logoUrl ? (
+                                    <img 
+                                        src={getImageUrl(eventId.plannerProfileId.logoUrl)} 
+                                        alt={eventId.plannerProfileId.organization || "Organizer"} 
+                                        className="h-10 w-10 rounded-full border-2 border-white/50 object-cover" 
+                                    />
+                                ) : (
+                                    <div className="h-10 w-10 rounded-full border-2 border-white/50 bg-white/10 flex items-center justify-center font-bold text-lg backdrop-blur-md">
+                                        {eventId.title?.charAt(0) || "E"}
+                                    </div>
+                                )} */}
                             </div>
 
                             <div className="space-y-2">
@@ -129,7 +149,7 @@ const TicketDetails = () => {
 
                     {/* Perforation Line */}
                     <div className="relative md:w-[2px] w-full md:h-auto h-[2px] bg-background">
-                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:top-auto md:-left-3 md:translate-x-0 w-6 h-6 bg-background rounded-full z-20"></div>
+                         {/* <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:top-auto md:-left-3 md:translate-x-0 w-6 h-6 bg-background rounded-full z-20"></div> */}
                          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 md:bottom-auto md:top-1/2 md:-right-3 md:translate-x-0 w-6 h-6 bg-background rounded-full z-20 hidden md:block"></div>
                          <div className="absolute bottom-auto top-1/2 -right-3 md:hidden w-6 h-6 bg-background rounded-full z-20"></div>
                          

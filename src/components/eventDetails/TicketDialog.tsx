@@ -1,18 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { fetchEventTicketTypes, type EventTicketType } from "@/api/tickets";
+import { toast } from "sonner";
 
 interface TicketDialogProps {
   open: boolean;
   onClose: () => void;
-  onPayNow: (data: { name: string; phone: string; persons: number; total: number }) => void;
-  unitPrice: number;
+  onPayNow: (data: { name: string; phone: string; persons: number; total: number; ticketTypeId: string }) => void;
+  eventId: string;
   currency?: string;
 }
 
-export const TicketDialog = ({ open, onClose, onPayNow, unitPrice, currency = "$" }: TicketDialogProps) => {
+export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "$" }: TicketDialogProps) => {
   const [name, setName] = useState("");
   const [phoneDigits, setPhoneDigits] = useState("");
   const [persons, setPersons] = useState<number>(1);
+  const [ticketTypes, setTicketTypes] = useState<EventTicketType[]>([]);
+  const [selectedTicketId, setSelectedTicketId] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open && eventId) {
+      setLoading(true);
+      fetchEventTicketTypes(eventId)
+        .then((response) => {
+          if (response.success && response.ticketTypes.length > 0) {
+            setTicketTypes(response.ticketTypes);
+            setSelectedTicketId(response.ticketTypes[0].id);
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to fetch ticket types:", error);
+          toast.error("Failed to load ticket types");
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [open, eventId]);
+
+  const selectedTicket = ticketTypes.find(t => t.id === selectedTicketId);
+  const unitPrice = selectedTicket?.price || 0;
   const total = Math.max(1, persons || 0) * unitPrice;
 
   if (!open) return null;
@@ -54,6 +80,27 @@ export const TicketDialog = ({ open, onClose, onPayNow, unitPrice, currency = "$
           </div>
 
           <div className="relative space-y-4">
+            <div>
+              <label htmlFor="ticket-type" className="block text-sm mb-1 text-muted-foreground">Ticket Type</label>
+              {loading ? (
+                 <div className="w-full h-10 bg-white/5 animate-pulse rounded-lg" />
+              ) : (
+                <select
+                  id="ticket-type"
+                  className="w-full rounded-lg bg-background/60 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-accent focus:border-accent/40 transition-shadow shadow-inner text-foreground appearance-none"
+                  value={selectedTicketId}
+                  onChange={(e) => setSelectedTicketId(e.target.value)}
+                >
+                  {ticketTypes.map((type) => (
+                    <option key={type.id} value={type.id} className="bg-background text-foreground">
+                      {type.name} - {currency}{type.price}
+                    </option>
+                  ))}
+                  {ticketTypes.length === 0 && <option>No tickets available</option>}
+                </select>
+              )}
+            </div>
+
             <div>
               <label htmlFor="ticket-name" className="block text-sm mb-1 text-muted-foreground">Name</label>
               <input
@@ -127,7 +174,14 @@ export const TicketDialog = ({ open, onClose, onPayNow, unitPrice, currency = "$
           <div className="relative mt-6 flex justify-end gap-3">
             <Button variant="outline" onClick={onClose} className="border-white/20">Cancel</Button>
             <Button
-              onClick={() => onPayNow({ name, phone: `+91 ${phoneDigits}`, persons: Math.max(1, persons || 0), total })}
+              disabled={!selectedTicketId || loading}
+              onClick={() => onPayNow({ 
+                name, 
+                phone: `+91 ${phoneDigits}`, 
+                persons: Math.max(1, persons || 0), 
+                total,
+                ticketTypeId: selectedTicketId
+              })}
               className="relative bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary overflow-hidden"
             >
               <span className="relative z-10">Pay Now</span>
