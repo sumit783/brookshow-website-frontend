@@ -129,3 +129,63 @@ export const checkArtistAvailability = async (
   const response = await client.get(`/api/user/artist/availability?artistId=${artistId}&serviceId=${serviceId}&date=${date}&startTime=${startTime}`);
   return response.data;
 };
+
+export interface BookingPriceResponse {
+  success: boolean;
+  available?: boolean;
+  price: number;
+  unit: string;
+  basePrice: number;
+  advance?: number;
+  duration: {
+    start: string;
+    end: string;
+    milliseconds: number;
+  };
+  message?: string;
+  conflicts?: {
+    bookings?: Array<{
+      id: string;
+      startAt: string;
+      endAt: string;
+      status: string;
+    }>;
+    calendarBlocks?: Array<{
+      id: string;
+      startDate: string;
+      endDate: string;
+      type: string;
+      title: string;
+    }>;
+  };
+}
+
+export const fetchBookingPrice = async (
+  artistId: string,
+  serviceId: string,
+  startDate: string,
+  endDate: string
+): Promise<BookingPriceResponse> => {
+  const response = await client.get(`/api/user/artist/${artistId}/price?serviceId=${serviceId}&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`);
+  return response.data;
+};
+
+export interface BookArtistRequest {
+  serviceId: string;
+  startDate: string;
+  endDate: string;
+  eventName: string;
+}
+
+export interface BookArtistResponse {
+  success: boolean;
+  message?: string;
+}
+
+export const bookArtist = async (
+  artistId: string,
+  payload: BookArtistRequest,
+): Promise<BookArtistResponse> => {
+  const response = await client.post(`/api/user/artist/${artistId}/book`, payload);
+  return response.data;
+};
