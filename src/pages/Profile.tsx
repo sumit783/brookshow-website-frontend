@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, LogOut, Ticket as TicketIcon, Calendar, MapPin, Mail, Phone } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { API_BASE_URI } from "@/api/client";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -58,6 +59,17 @@ const Profile = () => {
   }
 
   const { user, tickets, bookings } = profileData;
+
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    if (imagePath.startsWith('/')) {
+      return `${API_BASE_URI}${imagePath}`;
+    }
+    return `${API_BASE_URI}/${imagePath}`;
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 pt-24 max-w-4xl space-y-8">
@@ -169,7 +181,7 @@ const Profile = () => {
             {bookings.map((booking: BookingSummary) => (
               <Card key={booking.id} className="hover:shadow-md transition-shadow">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">{booking.artist.name}</CardTitle>
+                  <CardTitle className="text-lg">{booking.artist?.name || "Unknown Artist"}</CardTitle>
                   <CardDescription className="flex items-center gap-2">
                     <Badge variant="secondary" className="text-[10px] h-5">
                       {booking.service}
@@ -185,7 +197,7 @@ const Profile = () => {
                     {format(new Date(booking.date), "PPP p")}
                   </div>
                   <div className="flex flex-wrap gap-1">
-                    {booking.artist.category.map((cat) => (
+                    {booking.artist?.category?.map((cat) => (
                       <Badge key={cat} variant="outline" className="text-[10px] h-5">
                         {cat}
                       </Badge>
@@ -198,7 +210,9 @@ const Profile = () => {
                       onClick={() => {
                         const start = booking.startDate || booking.date;
                         const end = booking.endDate || booking.date;
-                        navigate(`/bookings/${booking.artist.id}?startDate=${encodeURIComponent(start)}&endDate=${encodeURIComponent(end)}`);
+                        if (booking.artist?.id) {
+                            navigate(`/bookings/${booking.artist.id}?startDate=${encodeURIComponent(start)}&endDate=${encodeURIComponent(end)}`);
+                        }
                       }}
                     >
                       View details
