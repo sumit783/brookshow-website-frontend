@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchTopArtists, type TopArtist } from "@/api/artists";
 import { API_BASE_URI } from "@/api/client";
 import { TopArtistsSkeleton } from "@/components/skeletons/TopArtistsSkeleton";
+import { LazyImage } from "@/components/ui/LazyImage";
 
 export const TopArtistsSection = () => {
   const navigate = useNavigate();
@@ -66,14 +67,12 @@ export const TopArtistsSection = () => {
               <div className="relative glass-modern rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/40 shadow-lg group-hover:shadow-xl transition-all duration-500 h-full min-h-[480px] flex flex-col transform group-hover:scale-[1.03]">
                 {/* Image Section */}
                 <div className="relative overflow-hidden h-48 flex-shrink-0">
-                  <img
+                  <LazyImage
                     src={getImageUrl(artist.image)}
                     alt={artist.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    onError={(e) => {
-                      // Fallback to a placeholder if image fails to load
-                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Artist';
-                    }}
+                    fallbackSrc="https://via.placeholder.com/400x300?text=Artist"
+                    skeletonClassName="rounded-t-2xl"
                   />
                   
                   {/* Gradient Overlay */}

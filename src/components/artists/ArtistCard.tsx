@@ -1,4 +1,5 @@
 import React from "react";
+import { LazyImage } from "@/components/ui/LazyImage";
 
 type Artist = {
   id: string;
@@ -24,10 +25,11 @@ export const ArtistCard: React.FC<ArtistCardProps> = ({ artist, index = 0, onVie
       onClick={() => onViewProfile(artist.id)}
     >
       <div className="relative h-72 overflow-hidden">
-        <img
+        <LazyImage
           src={artist.image}
           alt={`${artist.name} - ${artist.talent}`}
           className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700"
+          skeletonClassName="rounded-t-2xl"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-smooth"></div>
 

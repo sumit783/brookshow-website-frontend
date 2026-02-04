@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { CardTitle } from "@/components/ui/card";
 import { MapPin, Star } from "lucide-react";
+import { LazyImage } from "@/components/ui/LazyImage";
 
 type Stats = {
   events: number;
@@ -21,10 +22,11 @@ export const ProfileHeader = ({ image, name, category, rating, location, stats, 
   return (
     <div className="flex items-start gap-6">
       <div className="relative">
-        <img
+        <LazyImage
           src={image}
           alt={name}
           className="w-32 h-32 rounded-2xl object-cover border-2 border-accent/30"
+          skeletonClassName="rounded-2xl"
         />
         <div className="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-br from-accent to-primary rounded-full flex items-center justify-center">
           <div className="w-5 h-5 bg-white rounded-full"></div>

@@ -34,12 +34,14 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
     enabled: !!artistId,
   });
 
-  const formattedDate = selectedDate ? selectedDate.toISOString().split('T')[0] : '';
+  const formattedDate = selectedDate 
+    ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
+    : '';
 
   const { data: availabilityData, isLoading: isLoadingAvailability } = useQuery({
-    queryKey: ['artistAvailability', artistId, selectedService?.id, formattedDate, selectedTime],
-    queryFn: () => checkArtistAvailability(artistId, selectedService!.id, formattedDate, selectedTime),
-    enabled: !!artistId && !!selectedService && !!selectedDate && !!selectedTime,
+    queryKey: ['artistAvailability', artistId, selectedService?.id, formattedDate, selectedTime, endDate, endTime],
+    queryFn: () => checkArtistAvailability(artistId, selectedService!.id, formattedDate, selectedTime, endDate, endTime),
+    enabled: !!artistId && !!selectedService && !!selectedDate && !!selectedTime && !!endDate && !!endTime,
   });
 
   // Mock available time slots
@@ -173,7 +175,7 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
         </div>
 
         {/* Date Info */}
-        {selectedDate && (
+        {/* {selectedDate && (
           <div className="text-center p-4 bg-gradient-to-r from-accent/10 to-primary/10 rounded-lg border border-accent/20">
             <div className="flex items-center justify-center gap-2 mb-2">
               <CheckCircle className="w-5 h-5 text-accent" />
@@ -190,8 +192,7 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
               Available
             </Badge>
           </div>
-        )}
-
+        )} */}
         {/* Time Slots */}
         {selectedDate && (
           <div>

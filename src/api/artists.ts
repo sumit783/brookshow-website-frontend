@@ -124,9 +124,12 @@ export const checkArtistAvailability = async (
   artistId: string,
   serviceId: string,
   date: string,
-  startTime: string
+  startTime: string,
+  endDate: string,
+  endTime: string
 ): Promise<AvailabilityResponse> => {
-  const response = await client.get(`/api/user/artist/availability?artistId=${artistId}&serviceId=${serviceId}&date=${date}&startTime=${startTime}`);
+  console.log("artist availability data", artistId, serviceId, date, startTime, endDate, endTime);
+  const response = await client.get(`/api/user/artist/availability?artistId=${artistId}&serviceId=${serviceId}&date=${date}&startTime=${startTime}&endDate=${endDate}&endTime=${endTime}`);
   return response.data;
 };
 

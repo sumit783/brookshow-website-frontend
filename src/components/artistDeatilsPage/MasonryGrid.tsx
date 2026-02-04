@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Play, ExternalLink, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { LazyImage } from "@/components/ui/LazyImage";
 
 interface MediaItem {
   src: string;
@@ -43,11 +44,12 @@ export const MasonryGrid = ({ images, videos, pageSize = 12 }: MasonryGridProps)
           >
             {item.type === 'image' ? (
               <div className="relative">
-                <img
+                <LazyImage
                   src={item.src}
                   alt={`Portfolio ${startIdx + idx + 1}`}
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                   style={{ height: `${200 + Math.random() * 200}px` }}
+                  skeletonClassName="rounded-lg"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute bottom-4 right-4">
@@ -57,11 +59,12 @@ export const MasonryGrid = ({ images, videos, pageSize = 12 }: MasonryGridProps)
               </div>
             ) : (
               <div className="relative">
-                <img
+                <LazyImage
                   src={item.src}
                   alt={`Video ${startIdx + idx + 1}`}
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                   style={{ height: `${250 + Math.random() * 150}px` }}
+                  skeletonClassName="rounded-lg"
                 />
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
                   <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -128,14 +131,14 @@ export const MasonryGrid = ({ images, videos, pageSize = 12 }: MasonryGridProps)
               </button>
               
               {selectedMedia.type === 'image' ? (
-                <img
+                <LazyImage
                   src={selectedMedia.src}
                   alt="Portfolio item"
                   className="w-full h-auto max-h-[80vh] object-contain"
                 />
               ) : (
                 <div className="relative aspect-video bg-black flex items-center justify-center">
-                  <img
+                  <LazyImage
                     src={selectedMedia.src}
                     alt="Video thumbnail"
                     className="w-full h-full object-cover"

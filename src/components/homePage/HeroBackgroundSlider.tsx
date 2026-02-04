@@ -1,4 +1,5 @@
 import { ModernSlider } from "@/components/homePage/ModernSlider";
+import { LazyImage } from "@/components/ui/LazyImage";
 import djCard from "@/assets/dj-card.jpg";
 import artistCard from "@/assets/artist-card.jpg";
 import eventCard from "@/assets/event-card.jpg";
@@ -14,7 +15,7 @@ const backgroundImages = [
 export const HeroBackgroundSlider = () => {
   const slideElements = backgroundImages.map((bg) => (
     <div key={bg.id} className="relative w-full h-full">
-      <img
+      <LazyImage
         src={bg.image}
         alt={bg.title}
         className="w-full h-full object-cover"

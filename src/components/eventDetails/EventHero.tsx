@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Heart, Share2 } from "lucide-react";
+import { LazyImage } from "@/components/ui/LazyImage";
 
 interface EventHeroProps {
   image: string;
@@ -12,7 +13,7 @@ interface EventHeroProps {
 export const EventHero = ({ image, title, artist, status, onBack }: EventHeroProps) => {
   return (
     <div className="relative h-[60vh] overflow-hidden">
-      <img src={image} alt={title} className="w-full h-full object-cover" />
+      <LazyImage src={image} alt={title} className="w-full h-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
 
       <Button variant="glass" size="icon" className="absolute top-6 left-6 z-20" onClick={onBack}>
