@@ -10,6 +10,7 @@ import { fetchArtistServices, type ArtistService, checkArtistAvailability, fetch
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface BookingCalendarProps {
@@ -97,12 +98,17 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
       paidAmount: priceData?.advance || 0,
     }),
     onSuccess: (resp) => {
-      alert(resp.message || "Booking confirmed.");
-      setIsBookingDialogOpen(false);
-      navigate("/profile");
+      if (resp.success && resp.booking) {
+        toast.success(resp.message || "Booking confirmed.");
+        setIsBookingDialogOpen(false);
+        navigate(`/bookings/${resp.booking._id}`);
+      } else {
+        toast.error(resp.message || "Something went wrong.");
+      }
     },
-    onError: () => {
-      alert("Failed to place booking. Please try again.");
+    onError: (error: any) => {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to place booking. Please try again.");
     },
   });
 

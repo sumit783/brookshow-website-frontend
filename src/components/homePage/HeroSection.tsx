@@ -10,21 +10,21 @@ export const HeroSection = () => {
       <HeroBackgroundSlider />
       
       {/* Hero Content */}
-      <div className="relative z-10 text-center max-w-5xl mx-auto px-6">
-        <div className="glass-modern rounded-3xl p-16 shadow-strong backdrop-blur-xl fade-in-scale">
-          <h1 className="text-6xl font-hero mb-8 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent leading-tight">
+      <div className="relative z-10 text-center max-w-5xl mx-auto px-4 md:px-6">
+        <div className="glass-modern rounded-2xl md:rounded-3xl p-6 sm:p-10 md:p-16 shadow-strong backdrop-blur-xl fade-in-scale">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-hero mb-4 md:mb-8 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent p-2 leading-2xl">
             Empowering Talents, Ensuring Trust
           </h1>
           
-          <p className="text-xl md:text-2xl text-white mb-12 max-w-3xl mx-auto leading-relaxed font-medium">
+          <p className="text-base sm:text-lg md:text-2xl text-white/90 mb-8 md:mb-12 max-w-3xl mx-auto leading-relaxed font-medium">
             Discover & book trusted Artists, DJs, Event Planners & more
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
-            <Button variant="ticket" size="xl" className="min-w-56 pulse-glow" onClick={() => navigate("/events")}>
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center items-center">
+            <Button variant="ticket" size="xl" className="w-1/4 sm:min-w-56 pulse-glow" onClick={() => navigate("/events")}>
               Book Ticket
             </Button>
-            <Button variant="hero" size="xl" className="min-w-56" onClick={() => navigate("/artists")}>
+            <Button variant="hero" size="xl" className="w-1/4 sm:min-w-56" onClick={() => navigate("/artists")}>
               Book Artist
             </Button>
           </div>

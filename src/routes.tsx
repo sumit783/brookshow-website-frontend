@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
@@ -13,6 +13,14 @@ import SignIn from "@/pages/SignIn";
 import Profile from "@/pages/Profile";
 import BookedArtist from "@/pages/BookedArtist";
 
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    return <Navigate to="/signin" replace />;
+  }
+  return <>{children}</>;
+};
+
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -26,9 +34,22 @@ export const AppRoutes = () => {
         <Route path="contact" element={<Contact />} />
         <Route path="artists/:id" element={<ArtistProfile />} />
         <Route path="events/:id" element={<EventDetails />} />
-        <Route path="bookings/:id" element={<BookedArtist />} />
-        <Route path="profile" element={<Profile />} />
-
+        <Route 
+          path="bookings/:id" 
+          element={
+            <ProtectedRoute>
+              <BookedArtist />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="profile" 
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } 
+        />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

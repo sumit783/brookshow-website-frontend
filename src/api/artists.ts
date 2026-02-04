@@ -186,6 +186,7 @@ export interface BookArtistRequest {
 export interface BookArtistResponse {
   success: boolean;
   message?: string;
+  booking?: UserBooking;
 }
 
 export const bookArtist = async (
@@ -265,5 +266,21 @@ export interface SingleBookingResponse {
 
 export const fetchBookingById = async (id: string): Promise<SingleBookingResponse> => {
   const response = await client.get<SingleBookingResponse>(`/api/user/bookings/${id}`);
+  return response.data;
+};
+
+export interface ReviewRequest {
+  rating: number;
+  message: string;
+  artistId: string;
+}
+
+export const submitArtistReview = async (data: ReviewRequest): Promise<{ success: boolean; message: string }> => {
+  const response = await client.post(`/api/user/review`, data);
+  return response.data;
+};
+
+export const updateBookingStatus = async (id: string, status: string): Promise<{ success: boolean; message: string }> => {
+  const response = await client.patch(`/api/artist/bookings/${id}/status`, { status });
   return response.data;
 };
