@@ -210,8 +210,8 @@ const Profile = () => {
                       onClick={() => {
                         const start = booking.startDate || booking.date;
                         const end = booking.endDate || booking.date;
-                        if (booking.artist?.id) {
-                            navigate(`/bookings/${booking.artist.id}?startDate=${encodeURIComponent(start)}&endDate=${encodeURIComponent(end)}`);
+                        if (booking.id) {
+                            navigate(`/bookings/${booking.id}?startDate=${encodeURIComponent(start)}&endDate=${encodeURIComponent(end)}`);
                         }
                       }}
                     >

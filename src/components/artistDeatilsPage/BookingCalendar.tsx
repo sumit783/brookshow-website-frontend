@@ -92,6 +92,9 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
       startDate: startDateIso!,
       endDate: endDateIso!,
       eventName: eventName || "Event",
+      advanceAmount: priceData?.advance || 0,
+      totalPrice: priceData?.price || 0,
+      paidAmount: priceData?.advance || 0,
     }),
     onSuccess: (resp) => {
       alert(resp.message || "Booking confirmed.");
@@ -129,11 +132,6 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
         </CardTitle>
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground">Select a date and time for your event</p>
-          {/* {typeof price === 'number' && (
-            <Badge variant="outline" className="bg-green-500/10 text-green-300 border-green-400/30">
-              From ${price}
-            </Badge>
-          )} */}
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -300,7 +298,7 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
                   disabled={!priceData.available}
                   onClick={handleBookArtist}
                 >
-                  Book Artist
+                  Book Artist (₹{priceData.advance})
                 </Button>
               </>
             )}
