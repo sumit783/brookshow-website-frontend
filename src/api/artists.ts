@@ -183,10 +183,17 @@ export interface BookArtistRequest {
   paidAmount: number;
 }
 
+export interface RazorpayOrder {
+  id: string;
+  amount: number;
+  currency: string;
+}
+
 export interface BookArtistResponse {
   success: boolean;
   message?: string;
   booking?: UserBooking;
+  razorpayOrder?: RazorpayOrder;
 }
 
 export const bookArtist = async (
@@ -194,6 +201,17 @@ export const bookArtist = async (
   payload: BookArtistRequest,
 ): Promise<BookArtistResponse> => {
   const response = await client.post(`/api/user/artist/${artistId}/book`, payload);
+  return response.data;
+};
+
+export interface VerifyPaymentRequest {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+export const verifyArtistBookingPayment = async (payload: VerifyPaymentRequest): Promise<{ success: boolean; message: string }> => {
+  const response = await client.post(`/api/user/artist/booking/verify`, payload);
   return response.data;
 };
 

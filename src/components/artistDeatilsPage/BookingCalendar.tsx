@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, CheckCircle } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { fetchArtistServices, type ArtistService, checkArtistAvailability, fetchBookingPrice, bookArtist } from "@/api/artists";
+import { fetchArtistServices, type ArtistService, checkArtistAvailability, fetchBookingPrice, bookArtist, verifyArtistBookingPayment } from "@/api/artists";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,16 @@ interface BookingCalendarProps {
   price?: number;
   artistId: string;
 }
+
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendarProps) => {
   const navigate = useNavigate();
@@ -97,8 +107,50 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
       totalPrice: priceData?.price || 0,
       paidAmount: priceData?.advance || 0,
     }),
-    onSuccess: (resp) => {
-      if (resp.success && resp.booking) {
+    onSuccess: async (resp) => {
+      if (resp.success && resp.booking && resp.razorpayOrder) {
+        // Load Razorpay script
+        const res = await loadRazorpayScript();
+        if (!res) {
+          toast.error("Razorpay SDK failed to load. Please check your internet connection.");
+          return;
+        }
+
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: resp.razorpayOrder.amount,
+          currency: resp.razorpayOrder.currency,
+          name: "BrookShow",
+          description: `Booking for ${artistName}`,
+          order_id: resp.razorpayOrder.id,
+          handler: async (response: any) => {
+            try {
+              const verifyRes = await verifyArtistBookingPayment({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              });
+
+              if (verifyRes.success) {
+                toast.success("Payment successful! Booking confirmed.");
+                setIsBookingDialogOpen(false);
+                navigate(`/bookings/${resp.booking?._id}`);
+              } else {
+                toast.error(verifyRes.message || "Payment verification failed.");
+              }
+            } catch (err: any) {
+              console.error(err);
+              toast.error(err.response?.data?.message || "Payment verification failed.");
+            }
+          },
+          theme: {
+            color: "#6366f1",
+          },
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.open();
+      } else if (resp.success && resp.booking) {
         toast.success(resp.message || "Booking confirmed.");
         setIsBookingDialogOpen(false);
         navigate(`/bookings/${resp.booking._id}`);
