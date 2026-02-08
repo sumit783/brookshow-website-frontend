@@ -33,12 +33,12 @@ export const LiveTicketsSection = () => {
   };
 
   return (
-    <section className="sm:px-6 relative overflow-hidden">
+    <section className="py-16 md:py-28 lg:py-32 sm:px-6 relative overflow-hidden">
       {/* ... existing background code */}
       
       <div className="relative z-10 container mx-auto max-w-7xl">
         <div className="text-center mb-20">
-          <h2 className="text-5xl md:text-6xl font-hero mb-6 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-hero mb-6 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
             Live Tickets
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">

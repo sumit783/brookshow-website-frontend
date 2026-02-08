@@ -7,16 +7,16 @@ export const JoinSection = () => {
   const [artistOpen, setArtistOpen] = useState(false);
   const [plannerOpen, setPlannerOpen] = useState(false);
   return (
-    <section className="py-32 px-6 relative overflow-hidden">
+    <section className="py-16 md:py-28 lg:py-32 px-6 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-dark moving-bg"></div>
       
       <div className="relative z-10 container mx-auto max-w-5xl text-center">
-        <div className="glass-modern rounded-3xl p-16 shadow-strong fade-in-scale">
-          <h2 className="text-5xl md:text-6xl font-bold font-heading mb-8 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
+        <div className="glass-modern rounded-3xl p-8 sm:p-12 md:p-16 shadow-strong fade-in-scale">
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold font-heading mb-8 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
             Join BrookShow Today
           </h2>
           
-          <p className="text-2xl text-white/80 mb-12 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl md:text-2xl text-white/80 mb-12 max-w-3xl mx-auto leading-relaxed">
             Whether you're a talented artist or an experienced event planner, 
             join our community and showcase your skills to the world.
           </p>

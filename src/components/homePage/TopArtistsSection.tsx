@@ -30,12 +30,12 @@ export const TopArtistsSection = () => {
   };
 
   return (
-    <section className="py-20 md:py-28 lg:py-32 sm:px-6 relative overflow-hidden">
+    <section className="py-16 md:py-28 lg:py-32 sm:px-6 relative overflow-hidden">
       {/* ... existing background code */}
       
       <div className="relative z-10 container mx-auto max-w-7xl">
         <div className="text-center mb-20">
-          <h2 className="text-5xl md:text-6xl font-hero mb-6 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-hero mb-6 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
             Top <span className="text-primary font-hero">Artists</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
@@ -64,7 +64,7 @@ export const TopArtistsSection = () => {
               <div className="absolute -inset-0.5 bg-gradient-to-r from-accent via-primary to-accent rounded-2xl opacity-0 group-hover:opacity-60 blur transition-opacity duration-500"></div>
               
               {/* Main Card - Professional Design */}
-              <div className="relative glass-modern rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/40 shadow-lg group-hover:shadow-xl transition-all duration-500 h-full min-h-[480px] flex flex-col transform group-hover:scale-[1.03]">
+              <div className="relative glass-modern rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/40 shadow-lg group-hover:shadow-xl transition-all duration-500 h-full sm:min-h-[480px] flex flex-col transform group-hover:scale-[1.03]">
                 {/* Image Section */}
                 <div className="relative overflow-hidden h-48 flex-shrink-0">
                   <LazyImage
