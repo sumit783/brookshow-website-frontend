@@ -67,11 +67,18 @@ export interface BuyTicketData {
     buyerPhone: string;
 }
 
+export interface RazorpayOrder {
+    id: string;
+    amount: number;
+    currency: string;
+}
+
 export interface BuyTicketResponse {
     success: boolean;
     message: string;
     ticket: Ticket;
     walletUpdated?: boolean;
+    razorpayOrder?: RazorpayOrder;
 }
 
 export const buyTicket = async (data: BuyTicketData): Promise<BuyTicketResponse> => {
@@ -86,5 +93,16 @@ export interface EventTicketTypesResponse {
 
 export const fetchEventTicketTypes = async (eventId: string): Promise<EventTicketTypesResponse> => {
     const response = await client.get<EventTicketTypesResponse>(`/api/user/event/${eventId}/ticket-types`);
+    return response.data;
+};
+
+export interface VerifyTicketPurchaseRequest {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+}
+
+export const verifyTicketPurchase = async (data: VerifyTicketPurchaseRequest): Promise<{ success: boolean; message: string }> => {
+    const response = await client.post('/api/user/buy-ticket/verify', data);
     return response.data;
 };

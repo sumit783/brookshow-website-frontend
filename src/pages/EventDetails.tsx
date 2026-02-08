@@ -9,9 +9,19 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchEventDetails, type EventDetailsResponse } from "@/api/events";
 import { API_BASE_URI } from "@/api/client";
 import { EventDetailsSkeleton } from "@/components/skeletons/EventDetailsSkeleton";
-import { buyTicket } from "@/api/tickets";
+import { buyTicket, verifyTicketPurchase } from "@/api/tickets";
 import { toast } from "sonner";
 
+
+const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+};
 
 export default function EventDetails() {
   const { id } = useParams<{ id: string }>();
@@ -117,7 +127,49 @@ export default function EventDetails() {
                  buyerPhone: data.phone.replace("+91 ", "") // Extract number only
              });
 
-             if (response.success) {
+             if (response.success && response.ticket && response.razorpayOrder) {
+                // Load Razorpay script
+                const res = await loadRazorpayScript();
+                if (!res) {
+                    toast.error("Razorpay SDK failed to load. Please check your internet connection.");
+                    return;
+                }
+
+                const options = {
+                    key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                    amount: response.razorpayOrder.amount,
+                    currency: response.razorpayOrder.currency,
+                    name: "BrookShow",
+                    description: `Ticket Purchase for ${event.title}`,
+                    order_id: response.razorpayOrder.id,
+                    handler: async (resp: any) => {
+                        try {
+                            const verifyRes = await verifyTicketPurchase({
+                                razorpay_order_id: resp.razorpay_order_id,
+                                razorpay_payment_id: resp.razorpay_payment_id,
+                                razorpay_signature: resp.razorpay_signature,
+                            });
+
+                            if (verifyRes.success) {
+                                toast.success(verifyRes.message || "Ticket purchased successfully");
+                                setOpenDialog(false);
+                                navigate(`/ticket/${response.ticket._id}`);
+                            } else {
+                                toast.error(verifyRes.message || "Payment verification failed");
+                            }
+                        } catch (err: any) {
+                            console.error("Verification error:", err);
+                            toast.error(err.response?.data?.message || "Payment verification failed");
+                        }
+                    },
+                    theme: {
+                        color: "#6366f1",
+                    },
+                };
+
+                const rzp = new (window as any).Razorpay(options);
+                rzp.open();
+             } else if (response.success && response.ticket) {
                  toast.success(response.message || "Ticket purchased successfully");
                  setOpenDialog(false);
                  navigate(`/ticket/${response.ticket._id}`);
