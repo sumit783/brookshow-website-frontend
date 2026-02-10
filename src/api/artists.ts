@@ -302,3 +302,25 @@ export const updateBookingStatus = async (id: string, status: string): Promise<{
   const response = await client.patch(`/api/artist/bookings/${id}/status`, { status });
   return response.data;
 };
+
+export interface ArtistReview {
+  id: string;
+  clientId: string;
+  clientName: string;
+  clientImage: string;
+  rating: number;
+  message: string;
+  date: string;
+}
+
+export interface ArtistReviewsResponse {
+  success: boolean;
+  artistId: string;
+  totalReviews: number;
+  reviews: ArtistReview[];
+}
+
+export const fetchArtistReviews = async (artistId: string): Promise<ArtistReviewsResponse> => {
+  const response = await client.get<ArtistReviewsResponse>(`/api/user/artist/${artistId}/reviews`);
+  return response.data;
+};
