@@ -4,14 +4,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, CheckCircle } from "lucide-react";
+import { Clock, CheckCircle, Calendar as CalendarIcon } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { fetchArtistServices, type ArtistService, checkArtistAvailability, fetchBookingPrice, bookArtist, verifyArtistBookingPayment } from "@/api/artists";
+import { fetchArtistServices, type ArtistService, fetchBookingPrice, bookArtist, verifyArtistBookingPayment } from "@/api/artists";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DateRange } from "react-day-picker";
 
 interface BookingCalendarProps {
   artistName: string;
@@ -31,11 +32,9 @@ const loadRazorpayScript = () => {
 
 export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendarProps) => {
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedService, setSelectedService] = useState<ArtistService | undefined>(undefined);
-  const [endDate, setEndDate] = useState<string>("");
-  const [endTime, setEndTime] = useState<string>("");
   const [eventName, setEventName] = useState<string>("");
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
 
@@ -45,22 +44,23 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
     enabled: !!artistId,
   });
 
-  const formattedDate = selectedDate 
-    ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
-    : '';
+  // Format dates for API
+  const formatDate = (date: Date) => {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  };
 
-  const { data: availabilityData, isLoading: isLoadingAvailability } = useQuery({
-    queryKey: ['artistAvailability', artistId, selectedService?.id, formattedDate, selectedTime, endDate, endTime],
-    queryFn: () => checkArtistAvailability(artistId, selectedService!.id, formattedDate, selectedTime, endDate, endTime),
-    enabled: !!artistId && !!selectedService && !!selectedDate && !!selectedTime && !!endDate && !!endTime,
-  });
+  const startDate = dateRange?.from;
+  const endDate = dateRange?.to || dateRange?.from; // If no end date, use start date
 
-  // Mock available time slots
+  const formattedStartDate = startDate ? formatDate(startDate) : '';
+  const formattedEndDate = endDate ? formatDate(endDate) : '';
+
+  // Time slots
   const timeSlots = [
     "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "19:00", "20:00"
   ];
 
-  // Mock booked dates (you would fetch this from your backend)
+  // Mock booked dates
   const bookedDates = [
     new Date(2024, 11, 15),
     new Date(2024, 11, 20),
@@ -73,12 +73,14 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
     );
   };
 
-  const startDateIso = selectedDate && selectedTime
-    ? new Date(`${formattedDate}T${selectedTime}`).toISOString()
+  // Build ISO strings for API
+  const startDateIso = startDate && selectedTime
+    ? new Date(`${formattedStartDate}T${selectedTime}`).toISOString()
     : null;
 
-  const endDateIso = endDate && endTime
-    ? new Date(`${endDate}T${endTime}`).toISOString()
+  // End time uses the same selected time as start time
+  const endDateIso = endDate && selectedTime
+    ? new Date(`${formattedEndDate}T${selectedTime}`).toISOString()
     : null;
 
   const {
@@ -189,7 +191,7 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
           Book {artistName}
         </CardTitle>
         <div className="flex items-center justify-between">
-          <p className="text-muted-foreground">Select a date and time for your event</p>
+          <p className="text-muted-foreground">Select date range and start time for your event</p>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -217,45 +219,62 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
           </div>
         )}
 
-        {/* Calendar */}
-        <div className="flex justify-center">
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            disabled={(date) => 
-              date < new Date() || isDateBooked(date)
-            }
-            className="rounded-md border border-white/10 pointer-events-auto bg-background/50"
-          />
+        {/* Calendar with Date Range */}
+        <div className="space-y-3">
+          <h4 className="font-semibold flex items-center gap-2">
+            <CalendarIcon className="w-4 h-4" />
+            Select Date Range
+          </h4>
+          <div className="flex justify-center">
+            <Calendar
+              mode="range"
+              selected={dateRange}
+              onSelect={setDateRange}
+              disabled={(date) => 
+                date < new Date() || isDateBooked(date)
+              }
+              className="rounded-md border border-white/10 pointer-events-auto bg-background/50"
+              numberOfMonths={1}
+            />
+          </div>
         </div>
 
-        {/* Date Info */}
-        {/* {selectedDate && (
+        {/* Date Range Info */}
+        {dateRange?.from && (
           <div className="text-center p-4 bg-gradient-to-r from-accent/10 to-primary/10 rounded-lg border border-accent/20">
             <div className="flex items-center justify-center gap-2 mb-2">
               <CheckCircle className="w-5 h-5 text-accent" />
               <span className="font-semibold">
-                {selectedDate.toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
+                {dateRange.from.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
                 })}
+                {dateRange.to && dateRange.to.getTime() !== dateRange.from.getTime() && (
+                  <> - {dateRange.to.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}</>
+                )}
               </span>
             </div>
             <Badge variant="outline" className="bg-accent/20 text-accent border-accent/30">
-              Available
+              {dateRange.to && dateRange.to.getTime() !== dateRange.from.getTime() 
+                ? `${Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24)) + 1} days`
+                : 'Single day'}
             </Badge>
           </div>
-        )} */}
-        {/* Time Slots */}
-        {selectedDate && (
+        )}
+
+        {/* Time Slots - Only Start Time */}
+        {dateRange?.from && (
           <div>
             <h4 className="font-semibold mb-3 flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              Available Time Slots
+              Select Start Time
             </h4>
+            <p className="text-sm text-muted-foreground mb-3">End time will be set to the same time on the end date</p>
             <div className="grid grid-cols-3 gap-2">
               {timeSlots.map((time) => (
                 <Button
@@ -274,32 +293,6 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
             </div>
           </div>
         )}
-
-
-        {/* End date/time inputs */}
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="endDate">End Date</Label>
-              <Input
-                id="endDate"
-                type="date"
-                value={endDate}
-                min={formattedDate || new Date().toISOString().split('T')[0]}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="endTime">End Time</Label>
-              <Input
-                id="endTime"
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
 
         {/* Price & Availability Result */}
         {(isFetchingPrice || priceData || priceError) && (

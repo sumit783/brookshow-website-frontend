@@ -18,7 +18,6 @@ import { SimilarArtistsSkeleton } from "@/components/skeletons/SimilarArtistsSke
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 
-
 const ArtistProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -108,12 +107,12 @@ const ArtistProfile = () => {
             </Button>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-              {/* Artist Info */}
-              <div className="lg:col-span-2">
+              {/* Artist Info - Sticky */}
+              <div className="lg:col-span-2 lg:sticky lg:top-24 lg:self-start">
                 <Card className="bg-gradient-to-br from-background/95 to-background/90 backdrop-blur-2xl border border-white/10">
                   <CardHeader>
                     <ProfileHeader
-                      image={getImageUrl(artist.image) || 'https://via.placeholder.com/400x400?text=Artist'}
+                      image={getImageUrl(artist.image) || 'https://avatar.iran.liara.run/public'}
                       name={artist.name}
                       category={artist.category}
                       rating={artist.rating}
