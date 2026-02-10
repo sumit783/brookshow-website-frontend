@@ -20,7 +20,7 @@ const features = [
 
 export const FeaturesSection = () => {
   return (
-    <section className="py-16 md:py-28 lg:py-32 md:px-6 relative overflow-hidden">
+    <section className="countdown-section py-16 md:py-28 lg:py-32 md:px-6 relative overflow-hidden">
       {/* Moving Background */}
       <div className="absolute inset-0">
         {[...Array(25)].map((_, i) => (
@@ -39,7 +39,10 @@ export const FeaturesSection = () => {
 
       <div className="relative z-10 container mx-auto max-w-6xl">
         <div className="text-center mb-20">
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold font-heading mb-6 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
+          <h2 
+            className="text-3xl sm:text-5xl md:text-6xl font-bold font-heading mb-6 bg-clip-text text-transparent"
+             style={{ backgroundImage: "linear-gradient(90deg, rgb(251, 191, 36) 0%, rgb(129, 140, 248) 50%, rgb(244, 114, 182) 100%)" }}
+          >
             Why BrookShow?
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
@@ -53,20 +56,20 @@ export const FeaturesSection = () => {
             return (
               <div 
                 key={index}
-                className="glass-modern rounded-2xl p-6 sm:p-10 hover-glow transition-smooth text-center group fade-in-scale"
+                className="countdown-item group fade-in-scale"
                 style={{ animationDelay: `${index * 0.2}s` }}
               >
-                <div className="mb-8 flex justify-center">
+                <div className="mb-8 flex justify-center w-full relative z-10">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow group-hover:scale-110 transition-smooth pulse-glow">
                     <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                   </div>
                 </div>
                 
-                <h3 className="text-2xl font-bold font-heading mb-6 bg-gradient-to-r from-white to-accent bg-clip-text text-transparent">
+                <h3 className="text-2xl font-bold font-heading mb-6 bg-gradient-to-r from-white to-accent bg-clip-text text-transparent relative z-10">
                   {feature.title}
                 </h3>
                 
-                <p className="text-muted-foreground leading-relaxed text-lg">
+                <p className="text-muted-foreground leading-relaxed text-lg relative z-10">
                   {feature.description}
                 </p>
               </div>

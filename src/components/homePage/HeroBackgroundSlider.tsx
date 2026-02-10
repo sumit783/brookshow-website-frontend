@@ -1,9 +1,9 @@
 import { ModernSlider } from "@/components/homePage/ModernSlider";
 import { LazyImage } from "@/components/ui/LazyImage";
-import djCard from "@/assets/dj-card.jpg";
-import artistCard from "@/assets/artist-card.jpg";
-import eventCard from "@/assets/event-card.jpg";
-import bandCard from "@/assets/band-card.jpg";
+import djCard from "@/assets/pexels-alex-andrews-271121-1983046.jpg";
+import artistCard from "@/assets/pexels-marc-schulte-656598-2952834.jpg";
+import eventCard from "@/assets/pexels-teddy-2263436.jpg";
+import bandCard from "@/assets/pexels-wendywei-1190298.jpg";
 
 const backgroundImages = [
   { id: 1, image: djCard, title: "DJ Performance" },

@@ -12,7 +12,10 @@ export const HeroSection = () => {
       {/* Hero Content */}
       <div className="relative z-10 text-center max-w-5xl mx-auto px-4 md:px-6">
         <div className="glass-modern rounded-2xl md:rounded-3xl p-6 sm:p-10 md:p-16 shadow-strong backdrop-blur-xl fade-in-scale">
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-hero mb-4 md:mb-8 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent p-2 leading-2xl">
+          <h1 
+            className="text-3xl sm:text-5xl md:text-6xl font-hero mb-4 md:mb-8 bg-clip-text text-transparent p-2 leading-2xl"
+            style={{ backgroundImage: "linear-gradient(90deg, rgb(251, 191, 36) 0%, rgb(129, 140, 248) 50%, rgb(244, 114, 182) 100%)" }}
+          >
             Empowering Talents, Ensuring Trust
           </h1>
           
