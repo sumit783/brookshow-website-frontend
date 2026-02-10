@@ -20,7 +20,7 @@ const features = [
 
 export const FeaturesSection = () => {
   return (
-    <section className="py-16 md:py-28 lg:py-32 px-6 relative overflow-hidden">
+    <section className="py-16 md:py-28 lg:py-32 md:px-6 relative overflow-hidden">
       {/* Moving Background */}
       <div className="absolute inset-0">
         {[...Array(25)].map((_, i) => (

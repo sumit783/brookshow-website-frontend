@@ -6,17 +6,15 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Star, MapPin } from "lucide-react";
 import { BookingCalendar } from "@/components/artistDeatilsPage/BookingCalendar";
-import { MasonryGrid } from "@/components/artistDeatilsPage/MasonryGrid";
 import { ProfileHeader } from "@/components/artistDeatilsPage/ProfileHeader";
 import { AboutSection } from "@/components/artistDeatilsPage/AboutSection";
 import { Specialties } from "@/components/artistDeatilsPage/Specialties";
 import { fetchArtistProfile, type ArtistProfile, fetchSimilarArtists, type SimilarArtist, fetchArtistReviews, type ArtistReview } from "@/api/artists";
 import { API_BASE_URI } from "@/api/client";
 import { ArtistProfileSkeleton } from "@/components/skeletons/ArtistProfileSkeleton";
-import { ArtistCard } from "@/components/artists/ArtistCard";
-import { SimilarArtistsSkeleton } from "@/components/skeletons/SimilarArtistsSkeleton";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { format } from "date-fns";
+import { PortfolioSection } from "@/components/artistDeatilsPage/PortfolioSection";
+import { ReviewsSection } from "@/components/artistDeatilsPage/ReviewsSection";
+import { SimilarArtistsSection } from "@/components/artistDeatilsPage/SimilarArtistsSection";
 
 const ArtistProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -78,7 +76,7 @@ const ArtistProfile = () => {
   <div className="min-h-screen bg-background">
       <div className="pt-20">
         {/* Hero Section */}
-        <section className="relative py-16 md:py-20 lg:py-24 px-4 sm:px-6 overflow-hidden">
+        <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 md:px-6 overflow-hidden">
           {/* Background Effects */}
           <div className="absolute inset-0">
             <div className="absolute inset-0 bg-gradient-dark/20 moving-bg"></div>
@@ -100,15 +98,15 @@ const ArtistProfile = () => {
             <Button 
               variant="outline" 
               onClick={() => navigate('/')}
-              className="mb-8 glass-modern hover-neon gap-2"
+              className="mb-6 sm:mb-8 glass-modern hover-neon gap-2 w-full sm:w-auto"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Artists
             </Button>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-              {/* Artist Info - Sticky */}
-              <div className="lg:col-span-2 lg:sticky lg:top-24 lg:self-start">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
+              {/* Artist Info - Sticky on xl screens, normal flow on others */}
+              <div className="lg:col-span-2 xl:sticky xl:top-24 xl:self-start">
                 <Card className="bg-gradient-to-br from-background/95 to-background/90 backdrop-blur-2xl border border-white/10">
                   <CardHeader>
                     <ProfileHeader
@@ -122,7 +120,7 @@ const ArtistProfile = () => {
                     />
                   </CardHeader>
                   
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-4 sm:space-y-6">
                     <AboutSection bio={artist.bio} />
                     <Separator className="bg-white/10" />
                     <Specialties specialties={artist.specialties} />
@@ -140,136 +138,25 @@ const ArtistProfile = () => {
         </section>
 
         {/* Portfolio Section */}
-        <section className="py-16 md:py-20 px-4 sm:px-6">
-          <div className="container mx-auto max-w-7xl">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
-                Portfolio
-              </h2>
-              <p className="text-xl text-muted-foreground">
-                Explore {artist.name}'s work and performances
-              </p>
-            </div>
-            
-            {artist.portfolio.images.length > 0 || artist.portfolio.videos.length > 0 ? (
-              <MasonryGrid 
-                images={artist.portfolio.images.map(img => getImageUrl(img))}
-                videos={artist.portfolio.videos.map(vid => getImageUrl(vid))}
-              />
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No portfolio items available yet</p>
-              </div>
-            )}
-          </div>
-        </section>
+        <PortfolioSection 
+          artistName={artist.name} 
+          images={artist.portfolio.images} 
+          videos={artist.portfolio.videos} 
+        />
 
         {/* Reviews Section */}
-        <section className="py-16 md:py-20 px-4 sm:px-6 bg-accent/5">
-          <div className="container mx-auto max-w-7xl">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
-                Artist Reviews
-              </h2>
-              <p className="text-xl text-muted-foreground">
-                See what clients are saying about {artist.name}
-              </p>
-            </div>
-
-            {isLoadingReviews ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(3)].map((_, i) => (
-                  <Card key={i} className="animate-pulse bg-background/50 border-white/5 h-48" />
-                ))}
-              </div>
-            ) : reviewsData?.success && reviewsData.reviews.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {reviewsData.reviews.map((review: ArtistReview) => (
-                  <Card key={review.id} className="bg-background/50 backdrop-blur-xl border-white/10 hover-neon transition-all duration-300">
-                    <CardContent className="pt-6">
-                      <div className="flex items-center gap-4 mb-4">
-                        <Avatar className="h-12 w-12 border border-white/10">
-                          <AvatarImage src={getImageUrl(review.clientImage)} alt={review.clientName} />
-                          <AvatarFallback>{review.clientName.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-semibold text-white">{review.clientName}</p>
-                          <div className="flex items-center gap-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-3 h-3 ${i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-white/20"}`}
-                              />
-                            ))}
-                            <span className="text-xs text-muted-foreground ml-2">
-                              {format(new Date(review.date), 'MMM dd, yyyy')}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-muted-foreground italic leading-relaxed">
-                        "{review.message}"
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No reviews yet for this artist.</p>
-              </div>
-            )}
-          </div>
-        </section>
-
+        <ReviewsSection 
+          artistName={artist.name} 
+          reviews={reviewsData?.success ? reviewsData.reviews : []} 
+          isLoading={isLoadingReviews} 
+        />
 
         {/* Similar Artists */}
-        <section className="py-16 md:py-20 px-4 sm:px-6">
-          <div className="container mx-auto max-w-7xl">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
-                Similar Artists
-              </h2>
-              <p className="text-xl text-muted-foreground">
-                You may also like these similar artists
-              </p>
-            </div>
-
-            {isLoadingSimilar && <SimilarArtistsSkeleton />}
-
-            {similarArtistsError && (
-              <div className="text-center py-12">
-                <p className="text-destructive">Failed to load similar artists. Please try again later.</p>
-              </div>
-            )}
-
-            {similarArtistsData?.success && similarArtistsData.artists && similarArtistsData.artists.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                {similarArtistsData.artists.map((similarArtist: SimilarArtist) => (
-                  <ArtistCard 
-                    key={similarArtist.id}
-                    artist={{
-                      id: similarArtist.id,
-                      name: similarArtist.name,
-                      image: getImageUrl(similarArtist.image),
-                      talent: similarArtist.category, // Map category to talent
-                      rating: similarArtist.rating,
-                      city: similarArtist.location, // Map location to city
-                      price: similarArtist.price,
-                    }}
-                    onViewProfile={(artistId) => navigate(`/artists/${artistId}`)}
-                  />
-                ))}
-              </div>
-            )}
-
-            {similarArtistsData?.success && (!similarArtistsData.artists || similarArtistsData.artists.length === 0) && !isLoadingSimilar && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No similar artists found.</p>
-              </div>
-            )}
-          </div>
-        </section>
+        <SimilarArtistsSection 
+          artists={similarArtistsData?.success ? similarArtistsData.artists : []} 
+          isLoading={isLoadingSimilar} 
+          error={similarArtistsError} 
+        />
       </div>
     </div>
   );
