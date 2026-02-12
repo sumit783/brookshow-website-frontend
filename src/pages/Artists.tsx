@@ -3,30 +3,33 @@ import { useNavigate } from "react-router-dom";
 import { ArtistsFilters } from "@/components/artists/ArtistsFilters";
 import { ArtistCard } from "@/components/artists/ArtistCard";
 import { useQuery } from "@tanstack/react-query";
-import { fetchAllArtists, type AllArtist } from "@/api/artists";
+import { searchArtists, fetchSearchFilters } from "@/api/artists";
 import { API_BASE_URI } from "@/api/client";
 import { ArtistsGridSkeleton } from "@/components/skeletons/ArtistsGridSkeleton";
-
-interface Artist {
-  id: string;
-  name: string;
-  talent: string;
-  city: string;
-  image: string;
-  rating: number;
-  price?: number;
-}
-
+import { DateRange } from "react-day-picker";
 
 export default function Artists() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedTalent, setSelectedTalent] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+
+  // Fetch Filters
+  const { data: filtersData } = useQuery({
+    queryKey: ['artistSearchFilters'],
+    queryFn: fetchSearchFilters,
+  });
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['allArtists'],
-    queryFn: fetchAllArtists,
+    queryKey: ['artists', searchQuery, selectedCity, selectedTalent, dateRange?.from, dateRange?.to],
+    queryFn: () => searchArtists({
+      name: searchQuery,
+      location: selectedCity,
+      talent: selectedTalent,
+      startDate: dateRange?.from?.toISOString(),
+      endDate: dateRange?.to?.toISOString(),
+    }),
   });
 
   const allArtists = data?.artists || [];
@@ -43,15 +46,8 @@ export default function Artists() {
     return `${API_BASE_URI}/${imagePath}`;
   };
 
-  const cities = ["all", ...Array.from(new Set(allArtists.map(a => a.location)))]; // Use a.location instead of a.city
-  const talents = ["all", ...Array.from(new Set(allArtists.map(a => a.category)))]; // Use a.category instead of a.talent
-
-  const filteredArtists = allArtists.filter(artist => {
-    const matchesSearch = artist.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCity = selectedCity === "all" || artist.location === selectedCity; // Use artist.location
-    const matchesTalent = selectedTalent === "all" || artist.category === selectedTalent; // Use artist.category
-    return matchesSearch && matchesCity && matchesTalent;
-  });
+  const cities = ["all", ...(filtersData?.cities || [])]; 
+  const talents = ["all", ...(filtersData?.services || [])];
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,38 +67,23 @@ export default function Artists() {
           </div>
 
           {/* Filters */}
-          {isLoading ? (
-            <div className="mb-10">
-              <ArtistsFilters
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                selectedCity={selectedCity}
-                setSelectedCity={setSelectedCity}
-                selectedTalent={selectedTalent}
-                setSelectedTalent={setSelectedTalent}
-                cities={[]} // Empty array for cities while loading
-                talents={[]} // Empty array for talents while loading
-              />
-            </div>
-          ) : error ? (
-            <div className="text-center py-10 text-destructive">Failed to load filters.</div>
-          ) : (
-            <ArtistsFilters
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              selectedCity={selectedCity}
-              setSelectedCity={setSelectedCity}
-              selectedTalent={selectedTalent}
-              setSelectedTalent={setSelectedTalent}
-              cities={cities}
-              talents={talents}
-            />
-          )}
+          <ArtistsFilters
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedCity={selectedCity}
+            setSelectedCity={setSelectedCity}
+            selectedTalent={selectedTalent}
+            setSelectedTalent={setSelectedTalent}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            cities={cities}
+            talents={talents}
+          />
 
           {/* Artists Grid */}
           {isLoading && <ArtistsGridSkeleton />}
 
-          {error && !isLoading && ( // Show error only if not loading and there's an error
+          {error && !isLoading && (
             <div className="text-center py-16">
               <div className="glass-modern rounded-2xl p-12 max-w-md mx-auto">
                 <p className="text-2xl font-semibold text-destructive mb-2">Failed to Load Artists</p>
@@ -111,9 +92,9 @@ export default function Artists() {
             </div>
           )}
 
-          {!isLoading && !error && filteredArtists.length > 0 && (
+          {!isLoading && !error && allArtists.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {filteredArtists.map((artist, index) => (
+              {allArtists.map((artist, index) => (
                 <ArtistCard
                   key={artist.id}
                   artist={{
@@ -132,7 +113,7 @@ export default function Artists() {
             </div>
           )}
 
-          {!isLoading && !error && filteredArtists.length === 0 && (
+          {!isLoading && !error && allArtists.length === 0 && (
             <div className="text-center py-16">
               <div className="glass-modern rounded-2xl p-12 max-w-md mx-auto">
                 <p className="text-2xl font-semibold text-muted-foreground mb-2">No Artists Found</p>

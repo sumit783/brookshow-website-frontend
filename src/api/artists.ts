@@ -90,6 +90,37 @@ export const fetchAllArtists = async (): Promise<AllArtistsResponse> => {
   return response.data;
 };
 
+export interface SearchArtistsParams {
+  name?: string;
+  location?: string;
+  talent?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export const searchArtists = async (params: SearchArtistsParams): Promise<AllArtistsResponse> => {
+  const queryParams = new URLSearchParams();
+  if (params.name) queryParams.append('name', params.name);
+  if (params.location && params.location !== 'all') queryParams.append('location', params.location);
+  if (params.talent && params.talent !== 'all') queryParams.append('talent', params.talent);
+  if (params.startDate) queryParams.append('startDate', params.startDate);
+  if (params.endDate) queryParams.append('endDate', params.endDate);
+
+  const response = await client.get<AllArtistsResponse>(`/api/user/search-artist?${queryParams.toString()}`);
+  return response.data;
+};
+
+export interface SearchFiltersResponse {
+  success: boolean;
+  cities: string[];
+  services: string[];
+}
+
+export const fetchSearchFilters = async (): Promise<SearchFiltersResponse> => {
+  const response = await client.get<SearchFiltersResponse>(`/api/user/search-filters`);
+  return response.data;
+};
+
 export interface ArtistService {
   id: string;
   category: string;

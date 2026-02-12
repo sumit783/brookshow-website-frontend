@@ -97,3 +97,34 @@ export const fetchEventsList = async (): Promise<EventsListResponse> => {
   const response = await client.get(`/api/user/events`);
   return response.data;
 };
+
+export interface SearchEventsParams {
+  q?: string;
+  city?: string;
+  category?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export const searchEvents = async (params: SearchEventsParams): Promise<EventsListResponse> => {
+  const queryParams = new URLSearchParams();
+  if (params.q) queryParams.append('q', params.q);
+  if (params.city && params.city !== 'all') queryParams.append('city', params.city);
+  if (params.category && params.category !== 'all') queryParams.append('category', params.category);
+  if (params.startDate) queryParams.append('startDate', params.startDate);
+  if (params.endDate) queryParams.append('endDate', params.endDate);
+
+  const response = await client.get<EventsListResponse>(`/api/user/search-event?${queryParams.toString()}`);
+  return response.data;
+};
+
+export interface EventSearchFiltersResponse {
+  success: boolean;
+  cities: string[];
+  categories: string[];
+}
+
+export const fetchEventSearchFilters = async (): Promise<EventSearchFiltersResponse> => {
+  const response = await client.get<EventSearchFiltersResponse>(`/api/user/search-event-filters`);
+  return response.data;
+};

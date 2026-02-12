@@ -36,7 +36,7 @@ export const EventSidebar = ({ price, date, time, doors, location, onGetTickets 
               <span className="text-xs text-muted-foreground uppercase">Time</span>
             </div>
             <p className="font-bold text-foreground">{time}</p>
-            <p className="text-sm text-muted-foreground">Doors: {doors}</p>
+            <p className="text-sm text-muted-foreground">Entry: {doors}</p>
           </div>
 
           {/* <div className="bg-muted/20 rounded-xl p-4 border border-white/10">

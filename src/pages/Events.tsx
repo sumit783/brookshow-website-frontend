@@ -4,9 +4,10 @@ import { Search, Sparkles } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
 import { EventsFilters } from "@/components/events/EventsFilters";
 import { useQuery } from "@tanstack/react-query";
-import { fetchEventsList, type EventListItem } from "@/api/events";
+import { searchEvents, fetchEventSearchFilters } from "@/api/events";
 import { API_BASE_URI } from "@/api/client";
 import { EventsGridSkeleton } from "@/components/skeletons/EventsGridSkeleton";
+import { DateRange } from "react-day-picker";
 
 
 const Events = () => {
@@ -14,10 +15,23 @@ const Events = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+
+  // Fetch Filters
+  const { data: filtersData } = useQuery({
+    queryKey: ['eventSearchFilters'],
+    queryFn: fetchEventSearchFilters,
+  });
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['eventsList'],
-    queryFn: fetchEventsList,
+    queryKey: ['events', searchQuery, selectedCity, selectedCategory, dateRange?.from, dateRange?.to],
+    queryFn: () => searchEvents({
+      q: searchQuery,
+      city: selectedCity,
+      category: selectedCategory,
+      startDate: dateRange?.from?.toISOString(),
+      endDate: dateRange?.to?.toISOString(),
+    }),
   });
 
   const allEvents = data?.events || [];
@@ -34,19 +48,10 @@ const Events = () => {
     return `${API_BASE_URI}/${imagePath}`;
   };
 
-  const cities = ["all", ...Array.from(new Set(allEvents.map(event => event.location)))];
-  const categories = ["all", ...Array.from(new Set(allEvents.map(event => event.category || "Other")))];
+  const cities = ["all", ...(filtersData?.cities || [])];
+  const categories = ["all", ...(filtersData?.categories || [])];
 
-  const filteredEvents = allEvents.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.venue.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCity = selectedCity === "all" || event.location === selectedCity;
-    const matchesCategory = selectedCategory === "all" || event.category === selectedCategory;
-    
-    return matchesSearch && matchesCity && matchesCategory;
-  });
-
-    // Scroll to top when navigating to this page or switching event IDs
+    // Scroll to top when navigating to this page
     useEffect(() => {
         window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
       }, []);  
@@ -86,33 +91,19 @@ const Events = () => {
           </p>
         </div>
 
-        {isLoading ? (
-          <div className="mb-10">
-            <EventsFilters
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              selectedCity={selectedCity}
-              setSelectedCity={setSelectedCity}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              cities={[]} // Empty array for cities while loading
-              categories={[]} // Empty array for categories while loading
-            />
-          </div>
-        ) : error ? (
-          <div className="text-center py-10 text-destructive">Failed to load filters.</div>
-        ) : (
-          <EventsFilters
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            selectedCity={selectedCity}
-            setSelectedCity={setSelectedCity}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            cities={cities}
-            categories={categories}
-          />
-        )}
+        {/* Filters */}
+        <EventsFilters
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedCity={selectedCity}
+          setSelectedCity={setSelectedCity}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          cities={cities}
+          categories={categories}
+        />
 
         {/* Events Grid */}
         {isLoading && <EventsGridSkeleton />}
@@ -126,9 +117,9 @@ const Events = () => {
           </div>
         )}
 
-        {!isLoading && !error && filteredEvents.length > 0 && (
+        {!isLoading && !error && allEvents.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-fr">
-            {filteredEvents.map((event, index) => (
+            {allEvents.map((event, index) => (
               <div key={event.id} className="h-full">
                 <EventCard
                   event={{
@@ -145,7 +136,7 @@ const Events = () => {
                       event.status === "Available" ||
                       event.status === "Limited"
                         ? event.status
-                        : "Available", // Default to "Available" if status is not a valid type
+                        : "Available",
                     attendance: event.attendance || "N/A",
                     category: event.category || "Other",
                   }}
@@ -158,7 +149,7 @@ const Events = () => {
         )}
 
         {/* Empty State */}
-        {!isLoading && !error && filteredEvents.length === 0 && (
+        {!isLoading && !error && allEvents.length === 0 && (
           <div className="text-center py-32 fade-in-scale">
             <div className="glass-modern rounded-3xl p-16 max-w-2xl mx-auto border border-white/10">
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center mx-auto mb-6">
