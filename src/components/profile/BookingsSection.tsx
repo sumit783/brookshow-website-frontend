@@ -35,7 +35,18 @@ export const BookingsSection = ({ bookings }: BookingsSectionProps) => {
                   <Badge variant="secondary" className="text-[10px] h-5">
                     {booking.service}
                   </Badge>
-                  <Badge variant={booking.status === "confirmed" ? "secondary" : "outline"} className="text-[10px] h-5">
+                  <Badge 
+                    variant={
+                      booking.status === "confirmed" ? "secondary" : 
+                      booking.status === "cancelled" ? "destructive" : 
+                      "outline"
+                    } 
+                    className={`text-[10px] h-5 uppercase font-bold ${
+                      booking.status === "confirmed" ? "bg-green-500/10 text-green-500 border-green-500/20" : 
+                      booking.status === "pending" ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20" : 
+                      ""
+                    }`}
+                  >
                     {booking.status}
                   </Badge>
                 </CardDescription>

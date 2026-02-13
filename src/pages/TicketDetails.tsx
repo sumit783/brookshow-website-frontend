@@ -93,7 +93,7 @@ const TicketDetails = () => {
                                 <Badge className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-md">
                                     {ticketTypeId.title} Experience
                                 </Badge>
-                                 {/* {eventId.plannerProfileId?.logoUrl ? (
+                                 {eventId.plannerProfileId?.logoUrl ? (
                                     <img 
                                         src={getImageUrl(eventId.plannerProfileId.logoUrl)} 
                                         alt={eventId.plannerProfileId.organization || "Organizer"} 
@@ -103,7 +103,7 @@ const TicketDetails = () => {
                                     <div className="h-10 w-10 rounded-full border-2 border-white/50 bg-white/10 flex items-center justify-center font-bold text-lg backdrop-blur-md">
                                         {eventId.title?.charAt(0) || "E"}
                                     </div>
-                                )} */}
+                                )}
                             </div>
 
                             <div className="space-y-2">

@@ -223,7 +223,7 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
         <div className="space-y-3">
           <h4 className="font-semibold flex items-center gap-2">
             <CalendarIcon className="w-4 h-4" />
-            Select Date Range
+            Select Event Date Range
           </h4>
           <div className="flex justify-center">
             <Calendar
@@ -272,7 +272,7 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
           <div>
             <h4 className="font-semibold mb-3 flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              Select Start Time
+              Select Event Start Time
             </h4>
             <p className="text-sm text-muted-foreground mb-3">End time will be set to the same time on the end date</p>
             <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 gap-2">
@@ -376,6 +376,7 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
         </DialogHeader>
         <div className="space-y-4">
           <Label htmlFor="eventName">Event Name</Label>
+          <p className="text-sm text-muted-foreground">better name help artist remember your event</p>
           <Input
             id="eventName"
             placeholder="e.g. Wedding Reception"

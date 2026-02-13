@@ -42,6 +42,23 @@ export const ArtistInfoCard = ({
   const artist = booking.artistId;
   const service = booking.serviceId;
 
+  const handleContactArtist = () => {
+    const phone = artist.userId.phone;
+    if (phone) {
+      // Clean phone number (remove any non-numeric characters)
+      const cleanPhone = phone.replace(/\D/g, "");
+      window.open(`https://wa.me/${cleanPhone}`, "_blank");
+    }
+  };
+
+  const handleRequestInvoice = () => {
+    const email = "adityatrjara@gmail.com";
+    const body = `reqest invoice for :${booking._id}`;
+    const mailtoUrl = `mailto:${email}?body=${encodeURIComponent(body)}`;
+    console.log("Opening mailto:", mailtoUrl);
+    window.open(mailtoUrl, "_blank");
+  };
+
   return (
     <Card className="overflow-hidden border-white/10 bg-card/50 backdrop-blur-sm">
       <div className="grid md:grid-cols-3">
@@ -168,15 +185,21 @@ export const ArtistInfoCard = ({
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Button className="flex-1 bg-gradient-to-r from-primary to-accent">
+              <Button
+                type="button"
+                className="flex-1 bg-gradient-to-r from-primary to-accent"
+                onClick={handleContactArtist}
+              >
                 Contact Artist
               </Button>
-              <Button
+              {/* <Button
+                type="button"
                 variant="outline"
                 className="flex-1 border-white/10 hover:bg-white/5"
+                onClick={handleRequestInvoice}
               >
-                Download Invoice
-              </Button>
+                Request Invoice
+              </Button> */}
 
               {booking.status !== "cancelled" && (
                 <AlertDialog>
