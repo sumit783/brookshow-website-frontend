@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -15,11 +15,13 @@ import { ArtistProfileSkeleton } from "@/components/skeletons/ArtistProfileSkele
 import { PortfolioSection } from "@/components/artistDeatilsPage/PortfolioSection";
 import { ReviewsSection } from "@/components/artistDeatilsPage/ReviewsSection";
 import { SimilarArtistsSection } from "@/components/artistDeatilsPage/SimilarArtistsSection";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const ArtistProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+  const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
+
   const { data: artistData, isLoading, error } = useQuery({
     queryKey: ['artistProfile', id],
     queryFn: () => fetchArtistProfile(id!),
@@ -73,7 +75,7 @@ const ArtistProfile = () => {
   const artist = artistData;
 
   return (
-  <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <div className="pt-20">
         {/* Hero Section */}
         <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 md:px-6 overflow-hidden">
@@ -95,8 +97,8 @@ const ArtistProfile = () => {
 
           <div className="relative z-10 container mx-auto max-w-7xl">
             {/* Back Button */}
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => navigate('/')}
               className="mb-6 sm:mb-8 glass-modern hover-neon gap-2 w-full sm:w-auto"
             >
@@ -117,9 +119,10 @@ const ArtistProfile = () => {
                       location={artist.location}
                       stats={artist.stats}
                       price={artist.price}
+                      onBookClick={() => setIsBookingDialogOpen(true)}
                     />
                   </CardHeader>
-                  
+
                   <CardContent className="space-y-4 sm:space-y-6">
                     <AboutSection bio={artist.bio} />
                     <Separator className="bg-white/10" />
@@ -129,33 +132,53 @@ const ArtistProfile = () => {
                 </Card>
               </div>
 
-              {/* Booking Calendar */}
-              <div>
+              {/* Booking Calendar - Desktop */}
+              <div className="hidden lg:block">
                 <BookingCalendar artistName={artist.name} price={artist.price} artistId={artist.id} />
               </div>
             </div>
           </div>
         </section>
 
+        {/* Booking Dialog for Mobile/Tablet */}
+        <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
+          <DialogContent className="sm:max-w-[500px] h-[90vh] sm:h-auto overflow-y-auto bg-background/95 backdrop-blur-xl border-white/10 p-0">
+            <DialogHeader className="p-6 pb-0">
+              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-white to-accent bg-clip-text text-transparent">
+                Book {artist.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="p-6">
+              <BookingCalendar
+                artistName={artist.name}
+                price={artist.price}
+                artistId={artist.id}
+                isDialogView={true}
+                onSuccess={() => setIsBookingDialogOpen(false)}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Portfolio Section */}
-        <PortfolioSection 
-          artistName={artist.name} 
-          images={artist.portfolio.images} 
-          videos={artist.portfolio.videos} 
+        <PortfolioSection
+          artistName={artist.name}
+          images={artist.portfolio.images}
+          videos={artist.portfolio.videos}
         />
 
         {/* Reviews Section */}
-        <ReviewsSection 
-          artistName={artist.name} 
-          reviews={reviewsData?.success ? reviewsData.reviews : []} 
-          isLoading={isLoadingReviews} 
+        <ReviewsSection
+          artistName={artist.name}
+          reviews={reviewsData?.success ? reviewsData.reviews : []}
+          isLoading={isLoadingReviews}
         />
 
         {/* Similar Artists */}
-        <SimilarArtistsSection 
-          artists={similarArtistsData?.success ? similarArtistsData.artists : []} 
-          isLoading={isLoadingSimilar} 
-          error={similarArtistsError} 
+        <SimilarArtistsSection
+          artists={similarArtistsData?.success ? similarArtistsData.artists : []}
+          isLoading={isLoadingSimilar}
+          error={similarArtistsError}
         />
       </div>
     </div>

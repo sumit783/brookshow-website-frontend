@@ -36,9 +36,9 @@ export const UserInfoSection = ({ user, onLogout }: UserInfoSectionProps) => {
               )}
             </div>
           </div>
-          <div className="pt-2">
+          {/* <div className="pt-2">
             <Badge variant="outline">{user.role}</Badge>
-          </div>
+          </div> */}
         </div>
         <Button variant="destructive" size="sm" onClick={onLogout} className="flex gap-2">
           <LogOut className="h-4 w-4" /> Logout

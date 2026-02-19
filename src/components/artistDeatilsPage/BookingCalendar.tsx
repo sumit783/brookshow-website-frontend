@@ -18,6 +18,8 @@ interface BookingCalendarProps {
   artistName: string;
   price?: number;
   artistId: string;
+  isDialogView?: boolean;
+  onSuccess?: () => void;
 }
 
 const loadRazorpayScript = () => {
@@ -30,7 +32,7 @@ const loadRazorpayScript = () => {
   });
 };
 
-export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendarProps) => {
+export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onSuccess }: BookingCalendarProps) => {
   const navigate = useNavigate();
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [selectedTime, setSelectedTime] = useState<string>("");
@@ -68,7 +70,7 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
   ];
 
   const isDateBooked = (date: Date) => {
-    return bookedDates.some(bookedDate => 
+    return bookedDates.some(bookedDate =>
       bookedDate.toDateString() === date.toDateString()
     );
   };
@@ -136,6 +138,7 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
               if (verifyRes.success) {
                 toast.success("Payment successful! Booking confirmed.");
                 setIsBookingDialogOpen(false);
+                if (onSuccess) onSuccess();
                 navigate(`/bookings/${resp.booking?._id}`);
               } else {
                 toast.error(verifyRes.message || "Payment verification failed.");
@@ -155,6 +158,7 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
       } else if (resp.success && resp.booking) {
         toast.success(resp.message || "Booking confirmed.");
         setIsBookingDialogOpen(false);
+        if (onSuccess) onSuccess();
         navigate(`/bookings/${resp.booking._id}`);
       } else {
         toast.error(resp.message || "Something went wrong.");
@@ -183,220 +187,220 @@ export const BookingCalendar = ({ artistName, price, artistId }: BookingCalendar
 
   const isBookingInFlight = bookArtistMutation.status === "pending";
 
-  return (
-    <>
-    <Card className="bg-gradient-to-br from-background/95 to-background/90 backdrop-blur-xl border border-white/10">
-      <CardHeader>
-        <CardTitle className="text-xl font-bold bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
-          Book {artistName}
-        </CardTitle>
-        <div className="flex items-center justify-between">
-          <p className="text-muted-foreground">Select date range and start time for your event</p>
+  const content = (
+    <div className="space-y-6">
+      {/* Service Selection */}
+      {/* Service Selection */}
+      {isLoadingServices && <p>Loading services...</p>}
+      {servicesError && <p className="text-destructive">Failed to load services.</p>}
+      {servicesData?.success && servicesData.services.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="font-semibold">Select a Service</h4>
+          <Select onValueChange={(value) => {
+            const service = servicesData.services.find(s => s.id === value);
+            setSelectedService(service);
+          }}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a service" />
+            </SelectTrigger>
+            <SelectContent>
+              {servicesData.services.map((service) => (
+                <SelectItem key={service.id} value={service.id}>
+                  {service.category} - ₹{service.price_for_user.toLocaleString('en-IN')}/{service.unit}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Service Selection */}
-        {isLoadingServices && <p>Loading services...</p>}
-        {servicesError && <p className="text-destructive">Failed to load services.</p>}
-        {servicesData?.success && servicesData.services.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-semibold">Select a Service</h4>
-            <Select onValueChange={(value) => {
-              const service = servicesData.services.find(s => s.id === value);
-              setSelectedService(service);
-            }}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a service" />
-              </SelectTrigger>
-              <SelectContent>
-                {servicesData.services.map((service) => (
-                  <SelectItem key={service.id} value={service.id}>
-                    {service.category} - ₹{service.price_for_user.toLocaleString('en-IN')}/{service.unit}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+      )}
 
-        {/* Calendar with Date Range */}
-        <div className="space-y-3">
-          <h4 className="font-semibold flex items-center gap-2">
-            <CalendarIcon className="w-4 h-4" />
-            Select Event Date Range
-          </h4>
-          <div className="flex justify-center">
-            <Calendar
-              mode="range"
-              selected={dateRange}
-              onSelect={setDateRange}
-              disabled={(date) => 
-                date < new Date() || isDateBooked(date)
-              }
-              className="rounded-md border border-white/10 pointer-events-auto bg-background/50"
-              numberOfMonths={1}
-            />
-          </div>
+      {/* Calendar with Date Range */}
+      <div className="space-y-3">
+        <h4 className="font-semibold flex items-center gap-2">
+          <CalendarIcon className="w-4 h-4" />
+          Event Date Range
+        </h4>
+        <div className="flex justify-center">
+          <Calendar
+            mode="range"
+            selected={dateRange}
+            onSelect={setDateRange}
+            disabled={(date) =>
+              date < new Date() || isDateBooked(date)
+            }
+            className="rounded-md border border-white/10 pointer-events-auto bg-background/50"
+            numberOfMonths={1}
+          />
         </div>
+      </div>
 
-        {/* Date Range Info */}
-        {dateRange?.from && (
-          <div className="text-center p-4 bg-gradient-to-r from-accent/10 to-primary/10 rounded-lg border border-accent/20">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <CheckCircle className="w-5 h-5 text-accent" />
-              <span className="font-semibold">
-                {dateRange.from.toLocaleDateString('en-US', {
+      {/* Date Range Info */}
+      {dateRange?.from && (
+        <div className="text-center p-4 bg-gradient-to-r from-accent/10 to-primary/10 rounded-lg border border-accent/20">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <CheckCircle className="w-5 h-5 text-accent" />
+            <span className="font-semibold">
+              {dateRange.from.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              })}
+              {dateRange.to && dateRange.to.getTime() !== dateRange.from.getTime() && (
+                <> - {dateRange.to.toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric'
-                })}
-                {dateRange.to && dateRange.to.getTime() !== dateRange.from.getTime() && (
-                  <> - {dateRange.to.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                  })}</>
-                )}
-              </span>
-            </div>
-            <Badge variant="outline" className="bg-accent/20 text-accent border-accent/30">
-              {dateRange.to && dateRange.to.getTime() !== dateRange.from.getTime() 
-                ? `${Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24)) + 1} days`
-                : 'Single day'}
-            </Badge>
+                })}</>
+              )}
+            </span>
           </div>
-        )}
+          <Badge variant="outline" className="bg-accent/20 text-accent border-accent/30">
+            {dateRange.to && dateRange.to.getTime() !== dateRange.from.getTime()
+              ? `${Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24)) + 1} days`
+              : 'Single day'}
+          </Badge>
+        </div>
+      )}
 
-        {/* Time Slots - Only Start Time */}
-        {dateRange?.from && (
-          <div>
-            <h4 className="font-semibold mb-3 flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              Select Event Start Time
-            </h4>
-            <p className="text-sm text-muted-foreground mb-3">End time will be set to the same time on the end date</p>
-            <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 gap-2">
-              {timeSlots.map((time) => (
-                <Button
-                  key={time}
-                  variant={selectedTime === time ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedTime(time)}
-                  className={selectedTime === time 
-                    ? "bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary" 
-                    : "hover:bg-accent/20"
-                  }
-                >
-                  {time}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Price & Availability Result */}
-        {(isFetchingPrice || priceData || priceError) && (
-          <div className="p-4 rounded-lg border border-accent/30 bg-accent/10 space-y-3">
-            {isFetchingPrice && (
-              <p className="text-muted-foreground">Checking availability...</p>
-            )}
-            {priceError && (
-              <p className="text-destructive">Failed to fetch price. Please try again.</p>
-            )}
-            {priceData?.success && (
-              <>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Availability:</span>
-                  <Badge className={priceData.available ? "bg-green-500/10 text-green-300 border-green-400/30" : "bg-red-500/10 text-red-300 border-red-400/30"}>
-                    {priceData.available ? "Available" : "Not available"}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Base Price:</span>
-                  <span className="font-semibold">₹{priceData.basePrice.toLocaleString('en-IN')} / {priceData.unit}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Total Price:</span>
-                  <span className="font-bold">₹{priceData.price.toLocaleString('en-IN')}</span>
-                </div>
-                {typeof priceData.advance === 'number' && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Advance:</span>
-                    <span className="font-semibold">₹{priceData.advance.toLocaleString('en-IN')}</span>
-                  </div>
-                )}
-                {priceData.duration && (
-                  <div className="text-sm text-muted-foreground space-y-1">
-                    <div>Start: {new Date(priceData.duration.start).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
-                    <div>End: {new Date(priceData.duration.end).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
-                  </div>
-                )}
-                {priceData.message && (
-                  <p className="text-sm">{priceData.message}</p>
-                )}
-                {!priceData.available && priceData.conflicts && (
-                  <div className="text-sm text-muted-foreground space-y-1">
-                    {priceData.conflicts.bookings?.length ? (
-                      <div>Conflicting bookings: {priceData.conflicts.bookings.length}</div>
-                    ) : null}
-                    {priceData.conflicts.calendarBlocks?.length ? (
-                      <div>Calendar blocks: {priceData.conflicts.calendarBlocks.length}</div>
-                    ) : null}
-                  </div>
-                )}
-                <Button
-                  className="w-full h-12 text-base font-bold bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary transition-all duration-500"
-                  disabled={!priceData.available}
-                  onClick={handleBookArtist}
-                >
-                  Book Artist (₹{priceData.advance})
-                </Button>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Legend */}
-        <div className="text-sm text-muted-foreground space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-muted rounded-full"></div>
-            <span>Unavailable</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-accent rounded-full"></div>
-            <span>Available</span>
+      {/* Time Slots - Only Start Time */}
+      {dateRange?.from && (
+        <div>
+          <h4 className="font-semibold mb-3 flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            Event Start Time
+          </h4>
+          <p className="text-sm text-muted-foreground mb-3">End time will be set to the same time on the end date</p>
+          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 gap-2">
+            {timeSlots.map((time) => (
+              <Button
+                key={time}
+                variant={selectedTime === time ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedTime(time)}
+                className={selectedTime === time
+                  ? "bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary"
+                  : "hover:bg-accent/20"
+                }
+              >
+                {time}
+              </Button>
+            ))}
           </div>
         </div>
-      </CardContent>
-    </Card>
-    <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Enter Event Name</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <Label htmlFor="eventName">Event Name</Label>
-          <p className="text-sm text-muted-foreground">better name help artist remember your event</p>
-          <Input
-            id="eventName"
-            placeholder="e.g. Wedding Reception"
-            value={eventName}
-            onChange={(e) => setEventName(e.target.value)}
-          />
+      )}
+
+      {/* Price & Availability Result */}
+      {(isFetchingPrice || priceData || priceError) && (
+        <div className="p-4 rounded-lg border border-accent/30 bg-accent/10 space-y-3">
+          {isFetchingPrice && (
+            <p className="text-muted-foreground">Checking availability...</p>
+          )}
+          {priceError && (
+            <p className="text-destructive">Failed to fetch price. Please try again.</p>
+          )}
+          {priceData?.success && (
+            <>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Availability:</span>
+                <Badge className={priceData.available ? "bg-green-500/10 text-green-300 border-green-400/30" : "bg-red-500/10 text-red-300 border-red-400/30"}>
+                  {priceData.available ? "Available" : "Not available"}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Base Price:</span>
+                <span className="font-semibold">₹{priceData.basePrice.toLocaleString('en-IN')} / {priceData.unit}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Total Price:</span>
+                <span className="font-bold">₹{priceData.price.toLocaleString('en-IN')}</span>
+              </div>
+              {typeof priceData.advance === 'number' && (
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Advance:</span>
+                  <span className="font-semibold">₹{priceData.advance.toLocaleString('en-IN')}</span>
+                </div>
+              )}
+              {priceData.duration && (
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <div>Start: {new Date(priceData.duration.start).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
+                  <div>End: {new Date(priceData.duration.end).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
+                </div>
+              )}
+              {priceData.message && (
+                <p className="text-sm">{priceData.message}</p>
+              )}
+              {!priceData.available && priceData.conflicts && (
+                <div className="text-sm text-muted-foreground space-y-1">
+                  {priceData.conflicts.bookings?.length ? (
+                    <div>Conflicting bookings: {priceData.conflicts.bookings.length}</div>
+                  ) : null}
+                  {priceData.conflicts.calendarBlocks?.length ? (
+                    <div>Calendar blocks: {priceData.conflicts.calendarBlocks.length}</div>
+                  ) : null}
+                </div>
+              )}
+              <Button
+                className="w-full h-12 text-base font-bold bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary transition-all duration-500"
+                disabled={!priceData.available}
+                onClick={handleBookArtist}
+              >
+                Book Artist (₹{priceData.advance})
+              </Button>
+            </>
+          )}
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setIsBookingDialogOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmBooking}
-            disabled={isBookingInFlight}
-          >
-            {isBookingInFlight ? "Booking..." : "Confirm Booking"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      )}
+
+    </div>
+  );
+
+  return (
+    <>
+      {isDialogView ? (
+        content
+      ) : (
+        <Card className="bg-gradient-to-br from-background/95 to-background/90 backdrop-blur-xl border border-white/10">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">
+              Book {artistName}
+            </CardTitle>
+            <div className="flex items-center justify-between">
+              <p className="text-muted-foreground">Select date range and start time for your event</p>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {content}
+          </CardContent>
+        </Card>
+      )}
+      <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Enter Event Name</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Label htmlFor="eventName">Event Name</Label>
+            <p className="text-sm text-muted-foreground">better name help artist remember your event</p>
+            <Input
+              id="eventName"
+              placeholder="e.g. Wedding Reception"
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsBookingDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmBooking}
+              disabled={isBookingInFlight}
+            >
+              {isBookingInFlight ? "Booking..." : "Confirm Booking"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

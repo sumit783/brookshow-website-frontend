@@ -59,6 +59,21 @@ export const ArtistInfoCard = ({
     window.open(mailtoUrl, "_blank");
   };
 
+    const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "confirmed":
+        return "bg-green-500/10 text-green-500 border-green-500/20";
+      case "pending":
+        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
+      case "cancelled":
+        return "bg-red-500/10 text-red-500 border-red-500/20";
+      case "completed":
+        return "bg-green-500/10 text-green-500 border-green-500/20";
+      default:
+        return "bg-muted text-muted-foreground";
+    }
+  };
+
   return (
     <Card className="overflow-hidden border-white/10 bg-card/50 backdrop-blur-sm">
       <div className="grid md:grid-cols-3">
@@ -75,9 +90,12 @@ export const ArtistInfoCard = ({
         <div className="md:col-span-2">
           <CardHeader>
             <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-3xl font-bold">
+              <div className="w-full">
+                <CardTitle className="text-3xl font-bold flex items-center justify-between w-full">
                   {artist.userId.displayName}
+                  <Badge className={getStatusColor(booking.status)} variant="outline">
+                    {booking.status.toUpperCase()}
+                  </Badge>
                 </CardTitle>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {artist.category.map((cat) => (

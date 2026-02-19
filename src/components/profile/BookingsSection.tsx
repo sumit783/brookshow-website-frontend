@@ -44,6 +44,8 @@ export const BookingsSection = ({ bookings }: BookingsSectionProps) => {
                     className={`text-[10px] h-5 uppercase font-bold ${
                       booking.status === "confirmed" ? "bg-green-500/10 text-green-500 border-green-500/20" : 
                       booking.status === "pending" ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20" : 
+                      booking.status === "cancelled" ? "bg-red-500/10 text-red-500 border-red-500/20" : 
+                      booking.status === "completed" ? "bg-green-500/10 text-green-500 border-green-500/20" : 
                       ""
                     }`}
                   >
@@ -56,13 +58,13 @@ export const BookingsSection = ({ bookings }: BookingsSectionProps) => {
                   <Calendar className="h-4 w-4" />
                   {format(new Date(booking.date), "PPP p")}
                 </div>
-                <div className="flex flex-wrap gap-1">
+                {/* <div className="flex flex-wrap gap-1">
                   {booking.artist?.category?.map((cat) => (
                     <Badge key={cat} variant="outline" className="text-[10px] h-5">
                       {cat}
                     </Badge>
                   ))}
-                </div>
+                </div> */}
                 <div>
                   <Button
                     variant="outline"
