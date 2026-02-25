@@ -135,7 +135,7 @@ export const LiveTicketsSection = () => {
                       
                       <div className="flex items-center text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-500">
                         <MapPin className="w-4 h-4 mr-2 text-accent flex-shrink-0 group-hover:text-primary transition-colors duration-500" />
-                        <span className="font-medium">{event.venue}, {event.location}</span>
+                        <span className="font-medium text-left">{event.venue}, {event.location}</span>
                       </div>
                     </div>
                     

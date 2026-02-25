@@ -21,6 +21,27 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "$" 
 
   useEffect(() => {
     if (open && eventId) {
+      // Check for persisted data
+      const savedTicket = localStorage.getItem(`pending_ticket_${eventId}`);
+      if (savedTicket) {
+        try {
+          const parsed = JSON.parse(savedTicket);
+          if (parsed.name) setName(parsed.name);
+          if (parsed.phone) {
+            setPhoneDigits(parsed.phone.replace("+91 ", ""));
+          }
+          if (parsed.persons) setPersons(parsed.persons);
+          if (parsed.ticketTypeId) setSelectedTicketId(parsed.ticketTypeId);
+
+          // Note: cleaning up here might be too early if user closes and reopens,
+          // but usually restoration should happen once.
+          localStorage.removeItem(`pending_ticket_${eventId}`);
+        } catch (err) {
+          console.error("Failed to restore ticket data", err);
+          localStorage.removeItem(`pending_ticket_${eventId}`);
+        }
+      }
+
       setLoading(true);
       fetchEventTicketTypes(eventId)
         .then((response) => {
@@ -83,7 +104,7 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "$" 
             <div>
               <label htmlFor="ticket-type" className="block text-sm mb-1 text-muted-foreground">Ticket Type</label>
               {loading ? (
-                 <div className="w-full h-10 bg-white/5 animate-pulse rounded-lg" />
+                <div className="w-full h-10 bg-white/5 animate-pulse rounded-lg" />
               ) : (
                 <select
                   id="ticket-type"
@@ -175,10 +196,10 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "$" 
             <Button variant="outline" onClick={onClose} className="border-white/20">Cancel</Button>
             <Button
               disabled={!selectedTicketId || loading}
-              onClick={() => onPayNow({ 
-                name, 
-                phone: `+91 ${phoneDigits}`, 
-                persons: Math.max(1, persons || 0), 
+              onClick={() => onPayNow({
+                name,
+                phone: `+91 ${phoneDigits}`,
+                persons: Math.max(1, persons || 0),
                 total,
                 ticketTypeId: selectedTicketId
               })}

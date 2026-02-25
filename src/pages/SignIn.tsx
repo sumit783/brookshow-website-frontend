@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,11 +13,13 @@ import { toast } from "sonner";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const loginSchema = z.object({
-  email: z.string().email(),
+    email: z.string().email(),
 });
 
 const SignIn = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const redirectTo = location.state?.redirectTo || "/";
     const [step, setStep] = useState<"email" | "otp">("email");
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
@@ -63,7 +65,7 @@ const SignIn = () => {
                     localStorage.setItem("token", response.jwtToken);
                     localStorage.setItem("user", JSON.stringify(response.user));
                 }
-                navigate("/"); 
+                navigate(redirectTo);
             } else {
                 toast.error(response.message || "Invalid OTP");
             }
@@ -77,7 +79,7 @@ const SignIn = () => {
 
     return (
         <div className="min-h-screen grid lg:grid-cols-2">
-             <div className="hidden lg:flex flex-col bg-muted text-white p-10 justify-between relative overflow-hidden">
+            <div className="hidden lg:flex flex-col bg-muted text-white p-10 justify-between relative overflow-hidden">
                 <div className="absolute inset-0 bg-secondary/90" />
                 <div className="relative z-10">
                     <h2 className="text-2xl font-bold">BrookShow</h2>
@@ -90,9 +92,9 @@ const SignIn = () => {
                         <footer className="text-sm">Leonardo da Vinci</footer>
                     </blockquote>
                 </div>
-             </div>
-             
-             <div className="flex items-center justify-center p-8">
+            </div>
+
+            <div className="flex items-center justify-center p-8">
                 <Card className="w-full max-w-sm border-0 shadow-none">
                     <CardHeader className="text-center px-0">
                         <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
@@ -150,14 +152,14 @@ const SignIn = () => {
                     </CardContent>
                     <CardFooter className="px-0 flex flex-col gap-2">
                         <div className="text-center text-sm text-muted-foreground">
-                             Don't have an account?{" "}
-                             <Link to="/signup" className="underline underline-offset-4 hover:text-primary">
-                                 Sign up
-                             </Link>
+                            Don't have an account?{" "}
+                            <Link to="/signup" className="underline underline-offset-4 hover:text-primary">
+                                Sign up
+                            </Link>
                         </div>
                     </CardFooter>
                 </Card>
-             </div>
+            </div>
         </div>
     );
 };

@@ -14,13 +14,13 @@ import { toast } from "sonner";
 
 
 const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
-        const script = document.createElement("script");
-        script.src = "https://checkout.razorpay.com/v1/checkout.js";
-        script.onload = () => resolve(true);
-        script.onerror = () => resolve(false);
-        document.body.appendChild(script);
-    });
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
 };
 
 export default function EventDetails() {
@@ -49,7 +49,17 @@ export default function EventDetails() {
   // Scroll to top when navigating to this page or switching event IDs
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-  }, [id]);  
+  }, [id]);
+
+  // Auto-open ticket dialog if user returns after login with pending ticket data
+  useEffect(() => {
+    if (id) {
+      const savedTicket = localStorage.getItem(`pending_ticket_${id}`);
+      if (savedTicket) {
+        setOpenDialog(true);
+      }
+    }
+  }, [id]);
 
   if (isLoading) {
     return <EventDetailsSkeleton />;
@@ -63,7 +73,7 @@ export default function EventDetails() {
           <p className="text-muted-foreground mb-4">
             {error ? 'Failed to load event details. Please try again later.' : 'The event you are looking for does not exist.'}
           </p>
-          <button 
+          <button
             onClick={() => navigate('/events')}
             className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
           >
@@ -114,71 +124,81 @@ export default function EventDetails() {
         onPayNow={async (data) => {
           const token = localStorage.getItem("token");
           if (!token) {
-              toast.error("Please sign in to buy tickets");
-              navigate("/signin");
-              return;
+            const ticketToSave = {
+              ticketTypeId: data.ticketTypeId,
+              persons: data.persons,
+              name: data.name,
+              phone: data.phone,
+            };
+            localStorage.setItem(`pending_ticket_${event.id}`, JSON.stringify(ticketToSave));
+
+            toast.error("Please sign in to buy tickets");
+            navigate("/signin", { state: { redirectTo: window.location.pathname } });
+            return;
           }
 
           try {
-             const response = await buyTicket({
-                 ticketTypeId: data.ticketTypeId,
-                 quantity: data.persons,
-                 buyerName: data.name,
-                 buyerPhone: data.phone.replace("+91 ", "") // Extract number only
-             });
+            const response = await buyTicket({
+              ticketTypeId: data.ticketTypeId,
+              quantity: data.persons,
+              buyerName: data.name,
+              buyerPhone: data.phone.replace("+91 ", "") // Extract number only
+            });
 
-             if (response.success && response.ticket && response.razorpayOrder) {
-                // Load Razorpay script
-                const res = await loadRazorpayScript();
-                if (!res) {
-                    toast.error("Razorpay SDK failed to load. Please check your internet connection.");
-                    return;
-                }
+            if (response.success && response.ticket && response.razorpayOrder) {
+              // Load Razorpay script
+              const res = await loadRazorpayScript();
+              if (!res) {
+                toast.error("Razorpay SDK failed to load. Please check your internet connection.");
+                return;
+              }
 
-                const options = {
-                    key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-                    amount: response.razorpayOrder.amount,
-                    currency: response.razorpayOrder.currency,
-                    name: "BrookShow",
-                    description: `Ticket Purchase for ${event.title}`,
-                    order_id: response.razorpayOrder.id,
-                    handler: async (resp: any) => {
-                        try {
-                            const verifyRes = await verifyTicketPurchase({
-                                razorpay_order_id: resp.razorpay_order_id,
-                                razorpay_payment_id: resp.razorpay_payment_id,
-                                razorpay_signature: resp.razorpay_signature,
-                            });
+              const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                amount: response.razorpayOrder.amount,
+                currency: response.razorpayOrder.currency,
+                name: "BrookShow",
+                description: `Ticket Purchase for ${event.title}`,
+                order_id: response.razorpayOrder.id,
+                handler: async (resp: any) => {
+                  try {
+                    const verifyRes = await verifyTicketPurchase({
+                      razorpay_order_id: resp.razorpay_order_id,
+                      razorpay_payment_id: resp.razorpay_payment_id,
+                      razorpay_signature: resp.razorpay_signature,
+                    });
 
-                            if (verifyRes.success) {
-                                toast.success(verifyRes.message || "Ticket purchased successfully");
-                                setOpenDialog(false);
-                                navigate(`/ticket/${response.ticket._id}`);
-                            } else {
-                                toast.error(verifyRes.message || "Payment verification failed");
-                            }
-                        } catch (err: any) {
-                            console.error("Verification error:", err);
-                            toast.error(err.response?.data?.message || "Payment verification failed");
-                        }
-                    },
-                    theme: {
-                        color: "#6366f1",
-                    },
-                };
+                    if (verifyRes.success) {
+                      toast.success(verifyRes.message || "Ticket purchased successfully");
+                      localStorage.removeItem(`pending_ticket_${event.id}`);
+                      setOpenDialog(false);
+                      navigate(`/ticket/${response.ticket._id}`);
+                    } else {
+                      toast.error(verifyRes.message || "Payment verification failed");
+                    }
+                  } catch (err: any) {
+                    console.error("Verification error:", err);
+                    toast.error(err.response?.data?.message || "Payment verification failed");
+                  }
+                },
+                theme: {
+                  color: "#6366f1",
+                },
+              };
 
-                const rzp = new (window as any).Razorpay(options);
-                rzp.open();
-             } else if (response.success && response.ticket) {
-                 toast.success(response.message || "Ticket purchased successfully");
-                 setOpenDialog(false);
-                 navigate(`/ticket/${response.ticket._id}`);
-             } else {
-                 toast.error(response.message || "Failed to purchase ticket");
-             }
+              const rzp = new (window as any).Razorpay(options);
+              rzp.open();
+            } else if (response.success && response.ticket) {
+              toast.success(response.message || "Ticket purchased successfully");
+              localStorage.removeItem(`pending_ticket_${event.id}`);
+              setOpenDialog(false);
+              navigate(`/ticket/${response.ticket._id}`);
+            } else {
+              toast.error(response.message || "Failed to purchase ticket");
+            }
           } catch (error: any) {
-              console.error("Purchase error:", error);
-              toast.error(error.response?.data?.message || "An error occurred while purchasing");
+            console.error("Purchase error:", error);
+            toast.error(error.response?.data?.message || "An error occurred while purchasing");
           }
         }}
       />

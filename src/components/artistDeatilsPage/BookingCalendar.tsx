@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -39,12 +39,65 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
   const [selectedService, setSelectedService] = useState<ArtistService | undefined>(undefined);
   const [eventName, setEventName] = useState<string>("");
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
+  const [isRestored, setIsRestored] = useState(false);
+
+  // Persistence Key
+  const persistenceKey = `pending_booking_${artistId}`;
 
   const { data: servicesData, isLoading: isLoadingServices, error: servicesError } = useQuery({
     queryKey: ['artistServices', artistId],
     queryFn: () => fetchArtistServices(artistId),
     enabled: !!artistId,
   });
+
+  // Restore state from localStorage
+  useEffect(() => {
+    const savedBooking = localStorage.getItem(persistenceKey);
+    if (savedBooking) {
+      try {
+        const parsed = JSON.parse(savedBooking);
+
+        if (parsed.dateRange) {
+          setDateRange({
+            from: parsed.dateRange.from ? new Date(parsed.dateRange.from) : undefined,
+            to: parsed.dateRange.to ? new Date(parsed.dateRange.to) : undefined,
+          });
+        }
+
+        if (parsed.selectedTime) setSelectedTime(parsed.selectedTime);
+        if (parsed.eventName) setEventName(parsed.eventName);
+
+        // We set isRestored to true so we can try to restore selectedService
+        // once servicesData is loaded.
+        setIsRestored(true);
+      } catch (err) {
+        console.error("Failed to restore booking data", err);
+        localStorage.removeItem(persistenceKey);
+      }
+    }
+  }, [artistId, persistenceKey]);
+
+  // Restore selectedService when servicesData loaded
+  useEffect(() => {
+    if (isRestored && servicesData?.success && servicesData.services.length > 0) {
+      const savedBooking = localStorage.getItem(persistenceKey);
+      if (savedBooking) {
+        const parsed = JSON.parse(savedBooking);
+        if (parsed.selectedServiceId) {
+          const service = servicesData.services.find(s => s.id === parsed.selectedServiceId);
+          if (service) {
+            setSelectedService(service);
+          }
+        }
+      }
+      // Note: We don't remove the item yet because the user might need to complete the booking.
+      // We'll remove it after a successful booking or if they manually change/clear it?
+      // Actually, it's better to clear it once restored to avoid stale data on next refresh,
+      // but maybe waiting until they actually interact or submit is safer.
+      // Let's clear it now that restoration is complete.
+      localStorage.removeItem(persistenceKey);
+    }
+  }, [isRestored, servicesData, persistenceKey]);
 
   // Format dates for API
   const formatDate = (date: Date) => {
@@ -137,6 +190,7 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
 
               if (verifyRes.success) {
                 toast.success("Payment successful! Booking confirmed.");
+                localStorage.removeItem(persistenceKey);
                 setIsBookingDialogOpen(false);
                 if (onSuccess) onSuccess();
                 navigate(`/bookings/${resp.booking?._id}`);
@@ -157,6 +211,7 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
         rzp.open();
       } else if (resp.success && resp.booking) {
         toast.success(resp.message || "Booking confirmed.");
+        localStorage.removeItem(persistenceKey);
         setIsBookingDialogOpen(false);
         if (onSuccess) onSuccess();
         navigate(`/bookings/${resp.booking._id}`);
@@ -174,6 +229,18 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
     if (!selectedService || !startDateIso || !endDateIso || !priceData?.success) return;
     const token = localStorage.getItem("token");
     if (!token) {
+      // Save state before redirecting
+      const bookingToSave = {
+        dateRange: {
+          from: dateRange?.from?.toISOString(),
+          to: dateRange?.to?.toISOString(),
+        },
+        selectedTime,
+        selectedServiceId: selectedService.id,
+        eventName,
+      };
+      localStorage.setItem(persistenceKey, JSON.stringify(bookingToSave));
+
       navigate("/signin", { state: { redirectTo: window.location.pathname } });
       return;
     }
