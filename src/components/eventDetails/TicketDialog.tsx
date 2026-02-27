@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { fetchEventTicketTypes, type EventTicketType } from "@/api/tickets";
 import { toast } from "sonner";
 
@@ -9,9 +10,10 @@ interface TicketDialogProps {
   onPayNow: (data: { name: string; phone: string; persons: number; total: number; ticketTypeId: string }) => void;
   eventId: string;
   currency?: string;
+  isPaying?: boolean;
 }
 
-export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "$" }: TicketDialogProps) => {
+export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "$", isPaying = false }: TicketDialogProps) => {
   const [name, setName] = useState("");
   const [phoneDigits, setPhoneDigits] = useState("");
   const [persons, setPersons] = useState<number>(1);
@@ -195,7 +197,7 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "$" 
           <div className="relative mt-6 flex justify-end gap-3">
             <Button variant="outline" onClick={onClose} className="border-white/20">Cancel</Button>
             <Button
-              disabled={!selectedTicketId || loading}
+              disabled={!selectedTicketId || loading || isPaying}
               onClick={() => onPayNow({
                 name,
                 phone: `+91 ${phoneDigits}`,
@@ -203,11 +205,16 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "$" 
                 total,
                 ticketTypeId: selectedTicketId
               })}
-              className="relative bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary overflow-hidden"
+              className="relative bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary overflow-hidden min-w-[120px]"
             >
-              <span className="relative z-10">Pay Now</span>
+              <div className="relative z-10 flex items-center justify-center gap-2">
+                {isPaying && <Loader2 className="h-4 w-4 animate-spin" />}
+                <span>{isPaying ? "Processing..." : "Pay Now"}</span>
+              </div>
               {/* Shimmer */}
-              <div className="pointer-events-none absolute inset-0 -translate-x-[150%] hover:translate-x-[150%] transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+              {!isPaying && (
+                <div className="pointer-events-none absolute inset-0 -translate-x-[150%] hover:translate-x-[150%] transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+              )}
             </Button>
           </div>
         </div>

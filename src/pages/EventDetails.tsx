@@ -27,6 +27,7 @@ export default function EventDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [openDialog, setOpenDialog] = useState(false);
+  const [isPaying, setIsPaying] = useState(false);
 
   const { data: eventData, isLoading, error } = useQuery({
     queryKey: ['eventDetails', id],
@@ -121,7 +122,9 @@ export default function EventDetails() {
         onClose={() => setOpenDialog(false)}
         eventId={event.id}
         currency={(event.price || "").replace(/[0-9.\s]/g, "") || "₹"}
+        isPaying={isPaying}
         onPayNow={async (data) => {
+          setIsPaying(true);
           const token = localStorage.getItem("token");
           if (!token) {
             const ticketToSave = {
@@ -134,6 +137,7 @@ export default function EventDetails() {
 
             toast.error("Please sign in to buy tickets");
             navigate("/signin", { state: { redirectTo: window.location.pathname } });
+            setIsPaying(false);
             return;
           }
 
@@ -150,6 +154,7 @@ export default function EventDetails() {
               const res = await loadRazorpayScript();
               if (!res) {
                 toast.error("Razorpay SDK failed to load. Please check your internet connection.");
+                setIsPaying(false);
                 return;
               }
 
@@ -172,17 +177,25 @@ export default function EventDetails() {
                       toast.success(verifyRes.message || "Ticket purchased successfully");
                       localStorage.removeItem(`pending_ticket_${event.id}`);
                       setOpenDialog(false);
+                      setIsPaying(false);
                       navigate(`/ticket/${response.ticket._id}`);
                     } else {
                       toast.error(verifyRes.message || "Payment verification failed");
+                      setIsPaying(false);
                     }
                   } catch (err: any) {
                     console.error("Verification error:", err);
                     toast.error(err.response?.data?.message || "Payment verification failed");
+                    setIsPaying(false);
                   }
                 },
                 theme: {
                   color: "#6366f1",
+                },
+                modal: {
+                  ondismiss: () => {
+                    setIsPaying(false);
+                  },
                 },
               };
 
@@ -192,13 +205,16 @@ export default function EventDetails() {
               toast.success(response.message || "Ticket purchased successfully");
               localStorage.removeItem(`pending_ticket_${event.id}`);
               setOpenDialog(false);
+              setIsPaying(false);
               navigate(`/ticket/${response.ticket._id}`);
             } else {
               toast.error(response.message || "Failed to purchase ticket");
+              setIsPaying(false);
             }
           } catch (error: any) {
             console.error("Purchase error:", error);
             toast.error(error.response?.data?.message || "An error occurred while purchasing");
+            setIsPaying(false);
           }
         }}
       />

@@ -10,11 +10,5 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  },
-  server: {
-    host: "0.0.0.0",
-    hmr: {
-      clientPort: 5173,
-    },
-  },
+  }
 }));
