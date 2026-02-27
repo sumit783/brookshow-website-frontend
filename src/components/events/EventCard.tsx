@@ -45,13 +45,12 @@ export const EventCard: React.FC<EventCardProps> = ({ event, index = 0, onViewDe
 
           <div className="absolute top-4 left-4">
             <Badge
-              className={`px-4 py-2 rounded-xl text-xs font-bold shadow-xl border border-white/30 backdrop-blur-xl ${
-                event.status === "Selling Fast"
+              className={`px-4 py-2 rounded-xl text-xs font-bold shadow-xl border border-white/30 backdrop-blur-xl ${event.status === "Selling Fast"
                   ? "bg-gradient-to-r from-red-500/90 to-pink-500/90 text-white"
                   : event.status === "Limited"
-                  ? "bg-gradient-to-r from-yellow-400/90 to-orange-500/90 text-black"
-                  : "bg-gradient-to-r from-green-400/90 to-emerald-500/90 text-white"
-              }`}
+                    ? "bg-gradient-to-r from-yellow-400/90 to-orange-500/90 text-black"
+                    : "bg-gradient-to-r from-green-400/90 to-emerald-500/90 text-white"
+                }`}
             >
               {event.status}
             </Badge>
@@ -64,7 +63,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, index = 0, onViewDe
           </div>
 
           <div className="absolute bottom-4 right-4 bg-gradient-to-br from-accent to-primary rounded-2xl px-5 py-3 border border-white/30 shadow-lg backdrop-blur-xl">
-            <span className="text-2xl font-bold text-white drop-shadow-glow">{event.price}</span>
+            <span className="text-2xl font-bold text-white drop-shadow-glow">{event.price?.replace('$', '₹')}</span>
           </div>
         </div>
 

@@ -17,7 +17,7 @@ export const EventSidebar = ({ price, date, time, doors, location, onGetTickets 
         <div className="text-center mb-6">
           <p className="text-sm text-muted-foreground mb-2">Starting from</p>
           <p className="text-4xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
-            {price}
+            {price?.replace('$', '₹')}
           </p>
         </div>
 

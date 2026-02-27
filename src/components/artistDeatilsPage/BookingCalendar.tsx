@@ -34,8 +34,8 @@ const loadRazorpayScript = () => {
 
 export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onSuccess }: BookingCalendarProps) => {
   const navigate = useNavigate();
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [startDateTime, setStartDateTime] = useState<string>("");
+  const [endDateTime, setEndDateTime] = useState<string>("");
   const [selectedService, setSelectedService] = useState<ArtistService | undefined>(undefined);
   const [eventName, setEventName] = useState<string>("");
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
@@ -57,14 +57,8 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
       try {
         const parsed = JSON.parse(savedBooking);
 
-        if (parsed.dateRange) {
-          setDateRange({
-            from: parsed.dateRange.from ? new Date(parsed.dateRange.from) : undefined,
-            to: parsed.dateRange.to ? new Date(parsed.dateRange.to) : undefined,
-          });
-        }
-
-        if (parsed.selectedTime) setSelectedTime(parsed.selectedTime);
+        if (parsed.startDateTime) setStartDateTime(parsed.startDateTime);
+        if (parsed.endDateTime) setEndDateTime(parsed.endDateTime);
         if (parsed.eventName) setEventName(parsed.eventName);
 
         // We set isRestored to true so we can try to restore selectedService
@@ -99,44 +93,8 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
     }
   }, [isRestored, servicesData, persistenceKey]);
 
-  // Format dates for API
-  const formatDate = (date: Date) => {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-  };
-
-  const startDate = dateRange?.from;
-  const endDate = dateRange?.to || dateRange?.from; // If no end date, use start date
-
-  const formattedStartDate = startDate ? formatDate(startDate) : '';
-  const formattedEndDate = endDate ? formatDate(endDate) : '';
-
-  // Time slots
-  const timeSlots = [
-    "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "19:00", "20:00"
-  ];
-
-  // Mock booked dates
-  const bookedDates = [
-    new Date(2024, 11, 15),
-    new Date(2024, 11, 20),
-    new Date(2024, 11, 25)
-  ];
-
-  const isDateBooked = (date: Date) => {
-    return bookedDates.some(bookedDate =>
-      bookedDate.toDateString() === date.toDateString()
-    );
-  };
-
-  // Build ISO strings for API
-  const startDateIso = startDate && selectedTime
-    ? new Date(`${formattedStartDate}T${selectedTime}`).toISOString()
-    : null;
-
-  // End time uses the same selected time as start time
-  const endDateIso = endDate && selectedTime
-    ? new Date(`${formattedEndDate}T${selectedTime}`).toISOString()
-    : null;
+  const startDateIso = startDateTime ? new Date(startDateTime).toISOString() : null;
+  const endDateIso = endDateTime ? new Date(endDateTime).toISOString() : null;
 
   const {
     data: priceData,
@@ -231,11 +189,8 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
     if (!token) {
       // Save state before redirecting
       const bookingToSave = {
-        dateRange: {
-          from: dateRange?.from?.toISOString(),
-          to: dateRange?.to?.toISOString(),
-        },
-        selectedTime,
+        startDateTime,
+        endDateTime,
         selectedServiceId: selectedService.id,
         eventName,
       };
@@ -281,80 +236,35 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
         </div>
       )}
 
-      {/* Calendar with Date Range */}
-      <div className="space-y-3">
-        <h4 className="font-semibold flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4" />
-          Event Date Range
-        </h4>
-        <div className="flex justify-center">
-          <Calendar
-            mode="range"
-            selected={dateRange}
-            onSelect={setDateRange}
-            disabled={(date) =>
-              date < new Date() || isDateBooked(date)
-            }
-            className="rounded-md border border-white/10 pointer-events-auto bg-background/50"
-            numberOfMonths={1}
+      {/* Date and Time Inputs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="startDateTime" className="flex items-center gap-2">
+            <CalendarIcon className="w-4 h-4 text-accent" />
+            Start Date & Time
+          </Label>
+          <Input
+            id="startDateTime"
+            type="datetime-local"
+            value={startDateTime}
+            onChange={(e) => setStartDateTime(e.target.value)}
+            className="bg-background/50 border-white/10"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="endDateTime" className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-accent" />
+            End Date & Time
+          </Label>
+          <Input
+            id="endDateTime"
+            type="datetime-local"
+            value={endDateTime}
+            onChange={(e) => setEndDateTime(e.target.value)}
+            className="bg-background/50 border-white/10"
           />
         </div>
       </div>
-
-      {/* Date Range Info */}
-      {dateRange?.from && (
-        <div className="text-center p-4 bg-gradient-to-r from-accent/10 to-primary/10 rounded-lg border border-accent/20">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <CheckCircle className="w-5 h-5 text-accent" />
-            <span className="font-semibold">
-              {dateRange.from.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-              })}
-              {dateRange.to && dateRange.to.getTime() !== dateRange.from.getTime() && (
-                <> - {dateRange.to.toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}</>
-              )}
-            </span>
-          </div>
-          <Badge variant="outline" className="bg-accent/20 text-accent border-accent/30">
-            {dateRange.to && dateRange.to.getTime() !== dateRange.from.getTime()
-              ? `${Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24)) + 1} days`
-              : 'Single day'}
-          </Badge>
-        </div>
-      )}
-
-      {/* Time Slots - Only Start Time */}
-      {dateRange?.from && (
-        <div>
-          <h4 className="font-semibold mb-3 flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            Event Start Time
-          </h4>
-          <p className="text-sm text-muted-foreground mb-3">End time will be set to the same time on the end date</p>
-          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 gap-2">
-            {timeSlots.map((time) => (
-              <Button
-                key={time}
-                variant={selectedTime === time ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedTime(time)}
-                className={selectedTime === time
-                  ? "bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary"
-                  : "hover:bg-accent/20"
-                }
-              >
-                {time}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Price & Availability Result */}
       {(isFetchingPrice || priceData || priceError) && (

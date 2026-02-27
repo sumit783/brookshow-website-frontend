@@ -13,7 +13,7 @@ interface TicketDialogProps {
   isPaying?: boolean;
 }
 
-export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "$", isPaying = false }: TicketDialogProps) => {
+export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹", isPaying = false }: TicketDialogProps) => {
   const [name, setName] = useState("");
   const [phoneDigits, setPhoneDigits] = useState("");
   const [persons, setPersons] = useState<number>(1);

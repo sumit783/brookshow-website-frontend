@@ -97,22 +97,31 @@ export const ProfileHeader = ({ image, name, category, rating, location, stats, 
             )}
           </div>
 
-          <div className="flex justify-start gap-8 text-center">
-            <div>
-              <div className="font-bold text-2xl text-accent">{stats.events}</div>
-              <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Events</div>
-            </div>
-            <div>
-              <div className="font-bold text-2xl text-primary">{stats.experience}</div>
-              <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Years Exp</div>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="flex items-center gap-1 font-bold text-2xl text-yellow-400">
-                <Star className="w-5 h-5 fill-current" />
-                {rating}
+          <div className="flex justify-between items-center gap-8">
+            <div className="flex justify-start gap-8 text-center">
+              <div>
+                <div className="font-bold text-2xl text-accent">{stats.events}</div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Events</div>
               </div>
-              <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Rating</div>
+              <div>
+                <div className="font-bold text-2xl text-primary">{stats.experience}</div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Years Exp</div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="flex items-center gap-1 font-bold text-2xl text-yellow-400">
+                  <Star className="w-5 h-5 fill-current" />
+                  {rating}
+                </div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Rating</div>
+              </div>
             </div>
+
+            <Button
+              className="px-8 h-12 bg-gradient-to-r from-primary to-accent font-bold text-base shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+              onClick={onBookClick}
+            >
+              Book Artist
+            </Button>
           </div>
         </div>
       </div>

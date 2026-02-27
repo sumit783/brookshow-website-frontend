@@ -121,7 +121,7 @@ export default function EventDetails() {
         open={openDialog}
         onClose={() => setOpenDialog(false)}
         eventId={event.id}
-        currency={(event.price || "").replace(/[0-9.\s]/g, "") || "₹"}
+        currency={((event.price || "").replace(/[0-9.\s]/g, "") || "₹").replace('$', '₹')}
         isPaying={isPaying}
         onPayNow={async (data) => {
           setIsPaying(true);

@@ -106,36 +106,29 @@ const ArtistProfile = () => {
               Back to Artists
             </Button>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
-              {/* Artist Info - Sticky on xl screens, normal flow on others */}
-              <div className="lg:col-span-2 xl:sticky xl:top-24 xl:self-start">
-                <Card className="bg-gradient-to-br from-background/95 to-background/90 backdrop-blur-2xl border border-white/10">
-                  <CardHeader>
-                    <ProfileHeader
-                      image={getImageUrl(artist.image) || 'https://avatar.iran.liara.run/public'}
-                      name={artist.name}
-                      category={artist.category}
-                      rating={artist.rating}
-                      location={artist.location}
-                      stats={artist.stats}
-                      price={artist.price}
-                      onBookClick={() => setIsBookingDialogOpen(true)}
-                    />
-                  </CardHeader>
+            <div className="max-w-4xl mx-auto">
+              {/* Artist Info */}
+              <Card className="bg-gradient-to-br from-background/95 to-background/90 backdrop-blur-2xl border border-white/10">
+                <CardHeader>
+                  <ProfileHeader
+                    image={getImageUrl(artist.image) || 'https://avatar.iran.liara.run/public'}
+                    name={artist.name}
+                    category={artist.category}
+                    rating={artist.rating}
+                    location={artist.location}
+                    stats={artist.stats}
+                    price={artist.price}
+                    onBookClick={() => setIsBookingDialogOpen(true)}
+                  />
+                </CardHeader>
 
-                  <CardContent className="space-y-4 sm:space-y-6">
-                    <AboutSection bio={artist.bio} />
-                    <Separator className="bg-white/10" />
-                    <Specialties specialties={artist.specialties} />
-                    <Separator className="bg-white/10" />
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Booking Calendar - Desktop */}
-              <div className="hidden lg:block">
-                <BookingCalendar artistName={artist.name} price={artist.price} artistId={artist.id} />
-              </div>
+                <CardContent className="space-y-4 sm:space-y-6">
+                  <AboutSection bio={artist.bio} />
+                  <Separator className="bg-white/10" />
+                  <Specialties specialties={artist.specialties} />
+                  <Separator className="bg-white/10" />
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>

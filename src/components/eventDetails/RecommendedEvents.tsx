@@ -57,20 +57,19 @@ function RecommendedEvents({ events, currentId }: RecommendedEventsProps) {
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-transparent to-accent/30 opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
 
                     <div className="absolute top-4 left-4">
-                      <span className={`px-4 py-2 rounded-xl text-xs font-bold shadow-xl transition-all duration-300 border border-white/30 backdrop-blur-xl ${
-                        ev.status === 'Selling Fast'
+                      <span className={`px-4 py-2 rounded-xl text-xs font-bold shadow-xl transition-all duration-300 border border-white/30 backdrop-blur-xl ${ev.status === 'Selling Fast'
                           ? 'bg-gradient-to-r from-red-500/90 to-pink-500/90 text-white shadow-red-500/30'
                           : ev.status === 'Limited'
-                          ? 'bg-gradient-to-r from-yellow-400/90 to-orange-500/90 text-black shadow-yellow-500/30'
-                          : 'bg-gradient-to-r from-green-400/90 to-emerald-500/90 text-white shadow-green-500/30'
-                      }`}>
+                            ? 'bg-gradient-to-r from-yellow-400/90 to-orange-500/90 text-black shadow-yellow-500/30'
+                            : 'bg-gradient-to-r from-green-400/90 to-emerald-500/90 text-white shadow-green-500/30'
+                        }`}>
                         {ev.status}
                       </span>
                     </div>
 
                     <div className="absolute top-4 right-4 bg-gradient-to-br from-background/90 to-background/80 backdrop-blur-xl rounded-xl px-4 py-3 border border-white/30 shadow-lg">
                       <span className="text-2xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
-                        {ev.price}
+                        {ev.price?.replace('$', '₹')}
                       </span>
                     </div>
                   </div>
