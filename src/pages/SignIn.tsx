@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
 import { requestLoginOtp, verifyLoginOtp } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const loginSchema = z.object({
-    email: z.string().email(),
+    email: z.string().email("Please enter a valid email address"),
 });
 
 const SignIn = () => {
@@ -78,84 +78,191 @@ const SignIn = () => {
     };
 
     return (
-        <div className="min-h-screen grid lg:grid-cols-2">
-            <div className="hidden lg:flex flex-col bg-muted text-white p-10 justify-between relative overflow-hidden">
-                <div className="absolute inset-0 bg-secondary/90" />
-                <div className="relative z-10">
-                    <h2 className="text-2xl font-bold">BrookShow</h2>
+        <div className="min-h-screen grid lg:grid-cols-2 bg-[#0a0a0a] overflow-hidden">
+            {/* Left Side: Visual/Branding */}
+            <div className="hidden lg:flex flex-col p-12 justify-between relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/20 animate-pulse" />
+                <div className="absolute top-0 left-0 w-full h-full opacity-30">
+                    <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary rounded-full blur-[120px] animate-pulse" />
+                    <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent rounded-full blur-[120px] animate-pulse delay-700" />
                 </div>
-                <div className="relative z-10">
-                    <blockquote className="space-y-2">
-                        <p className="text-lg">
-                            "Simplicity is the ultimate sophistication."
+
+                <div className="relative z-10 flex items-center gap-2 slide-in-up">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
+                        <Sparkles className="w-6 h-6 text-white" />
+                    </div>
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+                        BrookShow
+                    </h2>
+                </div>
+
+                <div className="relative z-10 space-y-8 slide-in-up" style={{ animationDelay: "0.2s" }}>
+                    <div className="space-y-4">
+                        <h1 className="text-5xl font-extrabold leading-tight tracking-tight">
+                            Experience the <span className="text-primary italic">Ultimate</span> Sophistication.
+                        </h1>
+                        <p className="text-xl text-muted-foreground max-w-md leading-relaxed">
+                            Join our community and discover premium exclusive events tailored just for you.
                         </p>
-                        <footer className="text-sm">Leonardo da Vinci</footer>
-                    </blockquote>
+                    </div>
+
+                    <div className="flex gap-4 items-center">
+                        <div className="flex -space-x-4">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div key={i} className="w-12 h-12 rounded-full border-4 border-[#0a0a0a] bg-gray-800 overflow-hidden shadow-soft">
+                                    <img src={`https://i.pravatar.cc/150?u=${i + 10}`} alt="User" className="w-full h-full object-cover" />
+                                </div>
+                            ))}
+                        </div>
+                        <p className="text-sm text-muted-foreground font-medium">
+                            <span className="text-white">1,200+</span> members joined this week
+                        </p>
+                    </div>
+                </div>
+
+                <div className="relative z-10 slide-in-up" style={{ animationDelay: "0.4s" }}>
+                    <footer className="text-sm text-muted-foreground border-t border-white/10 pt-6">
+                        © 2024 BrookShow Inc. All rights reserved.
+                    </footer>
                 </div>
             </div>
 
-            <div className="flex items-center justify-center p-8">
-                <Card className="w-full max-w-sm border-0 shadow-none">
-                    <CardHeader className="text-center px-0">
-                        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-                        <CardDescription>
-                            {step === "email" ? "Enter your email to sign in" : "Enter the OTP sent to your email"}
+            {/* Right Side: Authentication Form */}
+            <div className="flex items-center justify-center p-6 sm:p-12 relative">
+                {/* Mobile branding */}
+                <div className="lg:hidden absolute top-8 left-8 flex items-center gap-2">
+                    <Sparkles className="w-6 h-6 text-primary" />
+                    <span className="font-bold text-xl">BrookShow</span>
+                </div>
+
+                <Card className="w-full max-w-md glass-modern border-0 relative z-10 fade-in-scale overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary" />
+
+                    <CardHeader className="space-y-2 pb-8">
+                        <div className="flex justify-center mb-2 lg:hidden">
+                            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                <ShieldCheck className="w-7 h-7 text-primary" />
+                            </div>
+                        </div>
+                        <CardTitle className="text-3xl font-bold text-center">
+                            {step === "email" ? "Welcome Back" : "Security Verification"}
+                        </CardTitle>
+                        <CardDescription className="text-center text-base">
+                            {step === "email" ? "Enter your email to access your account" : "We've sent a code to your email"}
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="px-0">
+
+                    <CardContent>
                         {step === "email" ? (
                             <Form {...form}>
-                                <form onSubmit={form.handleSubmit(onRequestOtp)} className="space-y-4">
+                                <form onSubmit={form.handleSubmit(onRequestOtp)} className="space-y-6">
                                     <FormField
                                         control={form.control}
                                         name="email"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Email</FormLabel>
+                                                <FormLabel className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Email Address</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="m@example.com" {...field} />
+                                                    <div className="relative">
+                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                                        <Input
+                                                            placeholder="m@example.com"
+                                                            className="pl-10 h-12 bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 transition-smooth"
+                                                            {...field}
+                                                        />
+                                                    </div>
                                                 </FormControl>
-                                                <FormMessage />
+                                                <FormMessage className="text-xs" />
                                             </FormItem>
                                         )}
                                     />
-                                    <Button type="submit" className="w-full" disabled={loading}>
-                                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Sign In with Email
+                                    <Button
+                                        type="submit"
+                                        className="w-full h-12 text-sm font-bold bg-gradient-primary hover:opacity-90 transition-bounce shadow-glow group"
+                                        disabled={loading}
+                                    >
+                                        {loading ? (
+                                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                        ) : (
+                                            <>
+                                                Continue
+                                                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                            </>
+                                        )}
                                     </Button>
                                 </form>
                             </Form>
                         ) : (
-                            <div className="space-y-6 flex flex-col items-center">
-                                <div className="text-center space-y-2">
+                            <div className="space-y-8 flex flex-col items-center py-2">
+                                <div className="text-center space-y-1">
                                     <p className="text-sm text-muted-foreground">
-                                        We sent a code to <strong>{email}</strong>
+                                        Check your inbox at
                                     </p>
+                                    <p className="font-bold text-white">{email}</p>
                                 </div>
-                                <InputOTP maxLength={4} value={otp} onChange={setOtp}>
-                                    <InputOTPGroup>
-                                        <InputOTPSlot index={0} />
-                                        <InputOTPSlot index={1} />
-                                        <InputOTPSlot index={2} />
-                                        <InputOTPSlot index={3} />
+                                <InputOTP maxLength={4} value={otp} onChange={setOtp} containerClassName="gap-3">
+                                    <InputOTPGroup className="gap-2">
+                                        {[0, 1, 2, 3].map((index) => (
+                                            <InputOTPSlot
+                                                key={index}
+                                                index={index}
+                                                className="w-14 h-14 text-xl font-bold bg-white/5 border-white/10 rounded-xl focus:border-primary/50 focus:ring-primary/20"
+                                            />
+                                        ))}
                                     </InputOTPGroup>
                                 </InputOTP>
-                                <Button onClick={onVerifyOtp} className="w-full" disabled={loading}>
-                                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Verify
-                                </Button>
-                                <Button variant="link" onClick={() => setStep("email")} className="text-sm">
-                                    Change Email
-                                </Button>
+                                <div className="w-full space-y-4">
+                                    <Button
+                                        onClick={onVerifyOtp}
+                                        className="w-full h-12 font-bold bg-gradient-primary hover:opacity-90 transition-bounce shadow-glow"
+                                        disabled={loading}
+                                    >
+                                        {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Verify Identity"}
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        onClick={() => setStep("email")}
+                                        className="w-full text-muted-foreground hover:text-white hover:bg-white/5"
+                                    >
+                                        Change Email
+                                    </Button>
+                                </div>
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="px-0 flex flex-col gap-2">
-                        <div className="text-center text-sm text-muted-foreground">
-                            Don't have an account?{" "}
-                            <Link to="/signup" className="underline underline-offset-4 hover:text-primary">
-                                Sign up
+
+                    <CardFooter className="flex flex-col gap-4 pt-6">
+                        <div className="w-full flex items-center gap-4 text-muted-foreground text-xs uppercase font-bold tracking-widest before:content-[''] before:flex-1 before:h-px before:bg-white/10 after:content-[''] after:flex-1 after:h-px after:bg-white/10">
+                            New here?
+                        </div>
+                        <Button variant="outline" className="w-full h-12 border-white/10 bg-transparent hover:bg-white/5 transition-smooth" asChild>
+                            <Link to="/signup">
+                                Create an Account
                             </Link>
+                        </Button>
+
+                        <div className="w-full flex items-center gap-4 text-primary/50 text-xs uppercase font-bold tracking-widest before:content-[''] before:flex-1 before:h-px before:bg-primary/10 after:content-[''] after:flex-1 after:h-px after:bg-primary/10 pt-4">
+                            Partner Portals
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 w-full">
+                            <Button
+                                variant="outline"
+                                className="h-10 border-primary/20 bg-primary/5 hover:bg-primary/10 text-xs font-bold transition-smooth hover:text-gray-200"
+                                asChild
+                            >
+                                <a href="https://artist.brookshow.com" target="_blank" rel="noopener noreferrer">
+                                    Artist Dashboard
+                                </a>
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="h-10 border-accent/20 bg-accent/5 hover:bg-accent/10 text-xs font-bold transition-smooth hover:text-gray-200"
+                                asChild
+                            >
+                                <a href="https://planner.brookshow.com" target="_blank" rel="noopener noreferrer">
+                                    Planner Dashboard
+                                </a>
+                            </Button>
                         </div>
                     </CardFooter>
                 </Card>
@@ -165,3 +272,4 @@ const SignIn = () => {
 };
 
 export default SignIn;
+

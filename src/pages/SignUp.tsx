@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, User, Mail, Phone, Globe, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
 import { registerUser, verifyRegistrationOtp } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,10 +13,10 @@ import { toast } from "sonner";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const registerSchema = z.object({
-  email: z.string().email(),
-  phone: z.string().min(10, "Phone number must be at least 10 digits"),
-  displayName: z.string().min(2, "Name must be at least 2 characters"),
-  countryCode: z.string().min(1, "Country code is required"),
+    email: z.string().email("Please enter a valid email address"),
+    phone: z.string().min(10, "Phone number must be at least 10 digits"),
+    displayName: z.string().min(2, "Name must be at least 2 characters"),
+    countryCode: z.string().min(1, "Country code is required"),
 });
 
 const SignUp = () => {
@@ -65,12 +65,11 @@ const SignUp = () => {
             const response = await verifyRegistrationOtp({ email, otp });
             if (response.success) {
                 toast.success("Email verified successfully!");
-                // Store token if needed, or just redirect
                 if (response.jwtToken) {
                     localStorage.setItem("token", response.jwtToken);
                     localStorage.setItem("user", JSON.stringify(response.user));
                 }
-                navigate("/"); 
+                navigate("/");
             } else {
                 toast.error(response.message || "Invalid OTP");
             }
@@ -83,44 +82,92 @@ const SignUp = () => {
     };
 
     return (
-        <div className="min-h-screen grid lg:grid-cols-2">
-             <div className="hidden lg:flex flex-col bg-muted text-white p-10 justify-between relative overflow-hidden">
-                <div className="absolute inset-0 bg-primary/90" />
-                <div className="relative z-10">
-                    <h2 className="text-2xl font-bold">BrookShow</h2>
+        <div className="min-h-screen grid lg:grid-cols-2 bg-[#0a0a0a] overflow-hidden">
+            {/* Left Side: Visual/Branding */}
+            <div className="hidden lg:flex flex-col p-12 justify-between relative order-last">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/20 animate-pulse" />
+                <div className="absolute top-0 left-0 w-full h-full opacity-30">
+                    <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary rounded-full blur-[120px] animate-pulse" />
+                    <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent rounded-full blur-[120px] animate-pulse delay-700" />
                 </div>
-                <div className="relative z-10">
-                    <blockquote className="space-y-2">
-                        <p className="text-lg">
-                            "The best way to predict the future is to wait for the event to happen."
+
+                <div className="relative z-10 flex items-center gap-2 slide-in-up">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
+                        <Sparkles className="w-6 h-6 text-white" />
+                    </div>
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+                        BrookShow
+                    </h2>
+                </div>
+
+                <div className="relative z-10 space-y-8 slide-in-up" style={{ animationDelay: "0.2s" }}>
+                    <div className="space-y-4">
+                        <h1 className="text-5xl font-extrabold leading-tight tracking-tight">
+                            Start Your <span className="text-primary italic">Premium</span> Journey.
+                        </h1>
+                        <p className="text-xl text-muted-foreground max-w-md leading-relaxed">
+                            Create an account today and get exclusive access to world-class events and experiences.
                         </p>
-                        <footer className="text-sm">Sofia Davis</footer>
-                    </blockquote>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="glass-modern p-4 rounded-2xl border-white/5 space-y-2">
+                            <ShieldCheck className="w-6 h-6 text-primary" />
+                            <h3 className="text-sm font-bold">Secure Auth</h3>
+                            <p className="text-xs text-muted-foreground">Advanced OTP-based security.</p>
+                        </div>
+                        <div className="glass-modern p-4 rounded-2xl border-white/5 space-y-2">
+                            <Sparkles className="w-6 h-6 text-accent" />
+                            <h3 className="text-sm font-bold">VIP Access</h3>
+                            <p className="text-xs text-muted-foreground">Priority booking for members.</p>
+                        </div>
+                    </div>
                 </div>
-             </div>
-             
-             <div className="flex items-center justify-center p-8">
-                <Card className="w-full max-w-sm border-0 shadow-none">
-                    <CardHeader className="text-center px-0">
-                        <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-                        <CardDescription>
-                            {step === "register" ? "Enter your details to get started" : "Verify your email to continue"}
+
+                <div className="relative z-10 slide-in-up" style={{ animationDelay: "0.4s" }}>
+                    <footer className="text-sm text-muted-foreground border-t border-white/10 pt-6">
+                        Trusted by over <span className="text-white font-bold">50,000+</span> luxury seekers worldwide.
+                    </footer>
+                </div>
+            </div>
+
+            {/* Right Side: Authentication Form */}
+            <div className="flex items-center justify-center p-6 sm:p-12 relative">
+                {/* Mobile branding */}
+                <div className="lg:hidden absolute top-8 left-8 flex items-center gap-2">
+                    <Sparkles className="w-6 h-6 text-primary" />
+                    <span className="font-bold text-xl">BrookShow</span>
+                </div>
+
+                <Card className="w-full max-w-md glass-modern border-0 relative z-10 fade-in-scale overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary" />
+
+                    <CardHeader className="space-y-2 pb-6">
+                        <CardTitle className="text-3xl font-bold text-center">
+                            {step === "register" ? "Create Account" : "Verify Email"}
+                        </CardTitle>
+                        <CardDescription className="text-center text-base">
+                            {step === "register" ? "Join the elite BrookShow community" : "Confirm your email to get started"}
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="px-0">
+
+                    <CardContent>
                         {step === "register" ? (
                             <Form {...form}>
-                                <form onSubmit={form.handleSubmit(onRegister)} className="space-y-4">
+                                <form onSubmit={form.handleSubmit(onRegister)} className="space-y-5">
                                     <FormField
                                         control={form.control}
                                         name="displayName"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Full Name</FormLabel>
+                                                <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Full Name</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="John Doe" {...field} />
+                                                    <div className="relative">
+                                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                                        <Input placeholder="John Doe" className="pl-10 h-11 bg-white/5 border-white/10 focus:border-primary/50 transition-smooth" {...field} />
+                                                    </div>
                                                 </FormControl>
-                                                <FormMessage />
+                                                <FormMessage className="text-xs" />
                                             </FormItem>
                                         )}
                                     />
@@ -129,25 +176,31 @@ const SignUp = () => {
                                         name="email"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Email</FormLabel>
+                                                <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email Address</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="m@example.com" {...field} />
+                                                    <div className="relative">
+                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                                        <Input placeholder="m@example.com" className="pl-10 h-11 bg-white/5 border-white/10 focus:border-primary/50 transition-smooth" {...field} />
+                                                    </div>
                                                 </FormControl>
-                                                <FormMessage />
+                                                <FormMessage className="text-xs" />
                                             </FormItem>
                                         )}
                                     />
-                                     <div className="grid grid-cols-4 gap-2">
+                                    <div className="grid grid-cols-3 gap-3">
                                         <FormField
                                             control={form.control}
                                             name="countryCode"
                                             render={({ field }) => (
                                                 <FormItem className="col-span-1">
-                                                    <FormLabel>Code</FormLabel>
+                                                    <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Code</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="+91" {...field} />
+                                                        <div className="relative">
+                                                            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                                                            <Input placeholder="+91" className="pl-8 h-11 bg-white/5 border-white/10 focus:border-primary/50 transition-smooth" {...field} />
+                                                        </div>
                                                     </FormControl>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-xs" />
                                                 </FormItem>
                                             )}
                                         />
@@ -155,59 +208,81 @@ const SignUp = () => {
                                             control={form.control}
                                             name="phone"
                                             render={({ field }) => (
-                                                <FormItem className="col-span-3">
-                                                    <FormLabel>Phone</FormLabel>
+                                                <FormItem className="col-span-2">
+                                                    <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Phone Number</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="1234567890" {...field} />
+                                                        <div className="relative">
+                                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                                            <Input placeholder="1234567890" className="pl-10 h-11 bg-white/5 border-white/10 focus:border-primary/50 transition-smooth" {...field} />
+                                                        </div>
                                                     </FormControl>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-xs" />
                                                 </FormItem>
                                             )}
                                         />
                                     </div>
-                                    <Button type="submit" className="w-full" disabled={loading}>
-                                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Sign Up
+                                    <Button type="submit" className="w-full h-12 text-sm font-bold bg-gradient-primary hover:opacity-90 transition-bounce shadow-glow group" disabled={loading}>
+                                        {loading ? (
+                                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                        ) : (
+                                            <>
+                                                Create Account
+                                                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                            </>
+                                        )}
                                     </Button>
                                 </form>
                             </Form>
                         ) : (
-                            <div className="space-y-6 flex flex-col items-center">
-                                <div className="text-center space-y-2">
-                                    <p className="text-sm text-muted-foreground">
-                                        We sent a verification code to <strong>{email}</strong>
-                                    </p>
+                            <div className="space-y-8 flex flex-col items-center py-2">
+                                <div className="text-center space-y-1">
+                                    <p className="text-sm text-muted-foreground">Verification code sent to</p>
+                                    <p className="font-bold text-white">{email}</p>
                                 </div>
-                                <InputOTP maxLength={4} value={otp} onChange={setOtp}>
-                                    <InputOTPGroup>
-                                        <InputOTPSlot index={0} />
-                                        <InputOTPSlot index={1} />
-                                        <InputOTPSlot index={2} />
-                                        <InputOTPSlot index={3} />
+                                <InputOTP maxLength={4} value={otp} onChange={setOtp} containerClassName="gap-3">
+                                    <InputOTPGroup className="gap-2">
+                                        {[0, 1, 2, 3].map((index) => (
+                                            <InputOTPSlot
+                                                key={index}
+                                                index={index}
+                                                className="w-14 h-14 text-xl font-bold bg-white/5 border-white/10 rounded-xl focus:border-primary/50"
+                                            />
+                                        ))}
                                     </InputOTPGroup>
                                 </InputOTP>
-                                <Button onClick={onVerifyOtp} className="w-full" disabled={loading}>
-                                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Verify
-                                </Button>
-                                <Button variant="link" onClick={() => setStep("register")} className="text-sm">
-                                    Change Email
-                                </Button>
+                                <div className="w-full space-y-4">
+                                    <Button
+                                        onClick={onVerifyOtp}
+                                        className="w-full h-12 font-bold bg-gradient-primary hover:opacity-90 transition-bounce shadow-glow"
+                                        disabled={loading}
+                                    >
+                                        {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Verify & Finish"}
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        onClick={() => setStep("register")}
+                                        className="w-full text-muted-foreground hover:text-white hover:bg-white/5"
+                                    >
+                                        Back to Details
+                                    </Button>
+                                </div>
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="px-0 flex flex-col gap-2">
+
+                    <CardFooter className="flex flex-col gap-4 pt-4 border-t border-white/5 mt-4">
                         <div className="text-center text-sm text-muted-foreground">
-                             Already have an account?{" "}
-                             <Link to="/signin" className="underline underline-offset-4 hover:text-primary">
-                                 Sign in
-                             </Link>
+                            Already have an account?{" "}
+                            <Link to="/signin" className="text-primary font-bold hover:underline underline-offset-4">
+                                Sign in
+                            </Link>
                         </div>
                     </CardFooter>
                 </Card>
-             </div>
+            </div>
         </div>
     );
 };
 
 export default SignUp;
+
