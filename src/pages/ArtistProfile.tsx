@@ -16,6 +16,7 @@ import { PortfolioSection } from "@/components/artistDeatilsPage/PortfolioSectio
 import { ReviewsSection } from "@/components/artistDeatilsPage/ReviewsSection";
 import { SimilarArtistsSection } from "@/components/artistDeatilsPage/SimilarArtistsSection";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SEO } from "@/components/SEO";
 
 const ArtistProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -76,6 +77,13 @@ const ArtistProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title={artist.name}
+        description={artist.bio}
+        ogImage={getImageUrl(artist.image)}
+        canonical={`https://brookshow.com/artists/${id}`}
+        ogType="profile"
+      />
       <div className="pt-20">
         {/* Hero Section */}
         <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 md:px-6 overflow-hidden">

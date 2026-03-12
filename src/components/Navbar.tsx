@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useState } from "react";
+import logo from "@/assets/logo.webp";
 
 export const Navbar = () => {
   const { pathname, hash } = useLocation();
@@ -48,10 +49,10 @@ export const Navbar = () => {
       <div className="relative container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg shadow-glow"></div>
-            <span className="text-xl font-bold font-heading text-foreground">
+            <img src={logo} alt="BrookShow Logo" className="w-auto md:h-14 h-10 object-contain" />
+            {/* <span className="text-xl font-bold font-heading text-foreground">
               BrookShow
-            </span>
+            </span> */}
           </Link>
           
           {/* Desktop Navigation */}
@@ -96,9 +97,10 @@ export const Navbar = () => {
                  </SheetTrigger>
                  <SheetContent side="right" className="bg-background/95 backdrop-blur-xl border-l border-white/10 w-full sm:max-w-xs">
                    <SheetHeader className="text-left mb-8">
-                     <SheetTitle className="text-2xl font-bold font-heading text-foreground">
-                        BrookShow
-                     </SheetTitle>
+                     <SheetTitle className="text-2xl font-bold font-heading text-foreground flex items-center gap-2">
+                         <img src={logo} alt="BrookShow Logo" className="w-8 h-8 object-contain" />
+                         BrookShow
+                      </SheetTitle>
                    </SheetHeader>
                    <div className="flex flex-col space-y-4">
                       {navLinks.map((link) => (

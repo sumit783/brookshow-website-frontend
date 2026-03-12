@@ -8,6 +8,7 @@ import { searchEvents, fetchEventSearchFilters } from "@/api/events";
 import { API_BASE_URI } from "@/api/client";
 import { EventsGridSkeleton } from "@/components/skeletons/EventsGridSkeleton";
 import { DateRange } from "react-day-picker";
+import { SEO } from "@/components/SEO";
 
 
 const Events = () => {
@@ -58,6 +59,11 @@ const Events = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
+      <SEO 
+        title="Book Unforgettable Events"
+        description="Experience unforgettable moments at the hottest events. Book tickets for concerts, festivals, and more at BrookShow."
+        canonical="https://brookshow.com/events"
+      />
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-dark/30 moving-bg"></div>
       <div className="absolute inset-0">

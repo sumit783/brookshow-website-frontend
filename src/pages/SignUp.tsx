@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, User, Mail, Phone, Globe, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import logo from "@/assets/logo.webp";
+import { SEO } from "@/components/SEO";
 import { registerUser, verifyRegistrationOtp } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,6 +85,11 @@ const SignUp = () => {
 
     return (
         <div className="min-h-screen grid lg:grid-cols-2 bg-[#0a0a0a] overflow-hidden">
+            <SEO 
+                title="Create Account"
+                description="Join the elite BrookShow community. Create an account today and get exclusive access to world-class events."
+                canonical="https://brookshow.com/signup"
+            />
             {/* Left Side: Visual/Branding */}
             <div className="hidden lg:flex flex-col p-12 justify-between relative order-last">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/20 animate-pulse" />
@@ -92,12 +99,10 @@ const SignUp = () => {
                 </div>
 
                 <div className="relative z-10 flex items-center gap-2 slide-in-up">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
-                        <Sparkles className="w-6 h-6 text-white" />
-                    </div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+                    <img src={logo} alt="BrookShow Logo" className="w-auto object-contain" />
+                    {/* <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
                         BrookShow
-                    </h2>
+                    </h2> */}
                 </div>
 
                 <div className="relative z-10 space-y-8 slide-in-up" style={{ animationDelay: "0.2s" }}>
@@ -135,7 +140,7 @@ const SignUp = () => {
             <div className="flex items-center justify-center p-6 sm:p-12 relative">
                 {/* Mobile branding */}
                 <div className="lg:hidden absolute top-8 left-8 flex items-center gap-2">
-                    <Sparkles className="w-6 h-6 text-primary" />
+                    <img src={logo} alt="BrookShow Logo" className="w-6 h-6 object-contain" />
                     <span className="font-bold text-xl">BrookShow</span>
                 </div>
 

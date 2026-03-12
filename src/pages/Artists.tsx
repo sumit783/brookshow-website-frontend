@@ -7,6 +7,7 @@ import { searchArtists, fetchSearchFilters } from "@/api/artists";
 import { API_BASE_URI } from "@/api/client";
 import { ArtistsGridSkeleton } from "@/components/skeletons/ArtistsGridSkeleton";
 import { DateRange } from "react-day-picker";
+import { SEO } from "@/components/SEO";
 
 export default function Artists() {
   const navigate = useNavigate();
@@ -51,6 +52,11 @@ export default function Artists() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Discover Talented Artists"
+        description="Connect with extraordinary performers and entertainers for your next unforgettable event at BrookShow."
+        canonical="https://brookshow.com/artists"
+      />
       
       <div className="relative pt-24 pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-dark moving-bg opacity-20"></div>

@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Mail, MapPin, Phone } from "lucide-react";
+import { SEO } from "@/components/SEO";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -32,6 +33,11 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Get in Touch"
+        description="Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible."
+        canonical="https://brookshow.com/contact"
+      />
       
       <div className="relative pt-24 pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-dark moving-bg opacity-30"></div>

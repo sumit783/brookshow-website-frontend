@@ -12,6 +12,8 @@ import SignUp from "@/pages/SignUp";
 import SignIn from "@/pages/SignIn";
 import Profile from "@/pages/Profile";
 import BookedArtist from "@/pages/BookedArtist";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsConditions from "@/pages/TermsConditions";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem("token");
@@ -34,6 +36,8 @@ export const AppRoutes = () => {
         <Route path="contact" element={<Contact />} />
         <Route path="artists/:id" element={<ArtistProfile />} />
         <Route path="events/:id" element={<EventDetails />} />
+        <Route path="privacy" element={<PrivacyPolicy />} />
+        <Route path="terms" element={<TermsConditions />} />
         <Route 
           path="bookings/:id" 
           element={

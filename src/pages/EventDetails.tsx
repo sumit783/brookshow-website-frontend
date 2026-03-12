@@ -11,6 +11,7 @@ import { API_BASE_URI } from "@/api/client";
 import { EventDetailsSkeleton } from "@/components/skeletons/EventDetailsSkeleton";
 import { buyTicket, verifyTicketPurchase } from "@/api/tickets";
 import { toast } from "sonner";
+import { SEO } from "@/components/SEO";
 
 
 const loadRazorpayScript = () => {
@@ -89,6 +90,13 @@ export default function EventDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-dark">
+      <SEO 
+        title={event.title}
+        description={event.description}
+        ogImage={getImageUrl(event.image)}
+        canonical={`https://brookshow.com/events/${id}`}
+        ogType="article"
+      />
       <EventHero
         image={getImageUrl(event.image)}
         title={event.title}
