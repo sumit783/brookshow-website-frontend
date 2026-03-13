@@ -212,6 +212,15 @@ export interface BookArtistRequest {
   advanceAmount: number;
   totalPrice: number;
   paidAmount: number;
+  eventAddress: string;
+  eventCity: string;
+  eventState: string;
+  eventCountry: string;
+  eventPincode: string;
+  eventLat: number;
+  eventLng: number;
+  clientName: string;
+  clientPhoneNumber: string;
 }
 
 export interface RazorpayOrder {

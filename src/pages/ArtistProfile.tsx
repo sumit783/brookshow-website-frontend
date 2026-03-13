@@ -15,7 +15,7 @@ import { ArtistProfileSkeleton } from "@/components/skeletons/ArtistProfileSkele
 import { PortfolioSection } from "@/components/artistDeatilsPage/PortfolioSection";
 import { ReviewsSection } from "@/components/artistDeatilsPage/ReviewsSection";
 import { SimilarArtistsSection } from "@/components/artistDeatilsPage/SimilarArtistsSection";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SEO } from "@/components/SEO";
 
 const ArtistProfile = () => {
@@ -148,6 +148,9 @@ const ArtistProfile = () => {
               <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-white to-accent bg-clip-text text-transparent">
                 Book {artist.name}
               </DialogTitle>
+              <DialogDescription className="text-muted-foreground mr-6">
+                Choose a service and time to book this artist.
+              </DialogDescription>
             </DialogHeader>
             <div className="p-6">
               <BookingCalendar

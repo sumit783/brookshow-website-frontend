@@ -11,8 +11,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DateRange } from "react-day-picker";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix for leaflet default icon issue in React
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+});
+
+// Map logic moved to main component useEffect
 
 interface BookingCalendarProps {
   artistName: string;
@@ -38,6 +53,16 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
   const [endDateTime, setEndDateTime] = useState<string>("");
   const [selectedService, setSelectedService] = useState<ArtistService | undefined>(undefined);
   const [eventName, setEventName] = useState<string>("");
+  const [eventAddress, setEventAddress] = useState<string>("");
+  const [eventCity, setEventCity] = useState<string>("");
+  const [eventState, setEventState] = useState<string>("");
+  const [eventCountry, setEventCountry] = useState<string>("India");
+  const [eventPincode, setEventPincode] = useState<string>("");
+  const [eventLat, setEventLat] = useState<number>(20.5937); // Default to India center
+  const [eventLng, setEventLng] = useState<number>(78.9629);
+  const [clientName, setClientName] = useState<string>("");
+  const [clientPhoneNumber, setClientPhoneNumber] = useState<string>("");
+
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
   const [isRestored, setIsRestored] = useState(false);
 
@@ -60,6 +85,15 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
         if (parsed.startDateTime) setStartDateTime(parsed.startDateTime);
         if (parsed.endDateTime) setEndDateTime(parsed.endDateTime);
         if (parsed.eventName) setEventName(parsed.eventName);
+        if (parsed.eventAddress) setEventAddress(parsed.eventAddress);
+        if (parsed.eventCity) setEventCity(parsed.eventCity);
+        if (parsed.eventState) setEventState(parsed.eventState);
+        if (parsed.eventCountry) setEventCountry(parsed.eventCountry);
+        if (parsed.eventPincode) setEventPincode(parsed.eventPincode);
+        if (parsed.eventLat) setEventLat(parsed.eventLat);
+        if (parsed.eventLng) setEventLng(parsed.eventLng);
+        if (parsed.clientName) setClientName(parsed.clientName);
+        if (parsed.clientPhoneNumber) setClientPhoneNumber(parsed.clientPhoneNumber);
 
         // We set isRestored to true so we can try to restore selectedService
         // once servicesData is loaded.
@@ -93,6 +127,53 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
     }
   }, [isRestored, servicesData, persistenceKey]);
 
+  // Map state and effect
+  useEffect(() => {
+    if (!isBookingDialogOpen) return;
+
+    // Small delay to ensure DialogContent is rendered and div has dimensions
+    const timer = setTimeout(() => {
+      const mapContainer = document.getElementById('event-map');
+      if (!mapContainer) return;
+
+      // Check if map is already initialized
+      if ((mapContainer as any)._leaflet_id) return;
+
+      const map = L.map('event-map').setView([eventLat, eventLng], 5);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      let marker = L.marker([eventLat, eventLng]).addTo(map);
+
+      map.on('click', (e) => {
+        const { lat, lng } = e.latlng;
+        setEventLat(lat);
+        setEventLng(lng);
+        
+        if (marker) {
+          marker.setLatLng(e.latlng);
+        } else {
+          marker = L.marker(e.latlng).addTo(map);
+        }
+      });
+
+      // Handle resize
+      const resizeObserver = new ResizeObserver(() => {
+        map.invalidateSize();
+      });
+      resizeObserver.observe(mapContainer);
+
+      return () => {
+        resizeObserver.disconnect();
+        map.remove();
+      };
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [isBookingDialogOpen]);
+
   const startDateIso = startDateTime ? new Date(startDateTime).toISOString() : null;
   const endDateIso = endDateTime ? new Date(endDateTime).toISOString() : null;
 
@@ -121,6 +202,15 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
       advanceAmount: priceData?.advance || 0,
       totalPrice: priceData?.price || 0,
       paidAmount: priceData?.advance || 0,
+      eventAddress,
+      eventCity,
+      eventState,
+      eventCountry,
+      eventPincode,
+      eventLat,
+      eventLng,
+      clientName,
+      clientPhoneNumber,
     }),
     onSuccess: async (resp) => {
       if (resp.success && resp.booking && resp.razorpayOrder) {
@@ -193,6 +283,15 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
         endDateTime,
         selectedServiceId: selectedService.id,
         eventName,
+        eventAddress,
+        eventCity,
+        eventState,
+        eventCountry,
+        eventPincode,
+        eventLat,
+        eventLng,
+        clientName,
+        clientPhoneNumber,
       };
       localStorage.setItem(persistenceKey, JSON.stringify(bookingToSave));
 
@@ -351,19 +450,107 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
         </Card>
       )}
       <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Enter Event Name</DialogTitle>
+            <DialogTitle>Enter Event Details</DialogTitle>
+            <DialogDescription>
+              Please provide the location and name of your event to help the artist prepare.
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <Label htmlFor="eventName">Event Name</Label>
-            <p className="text-sm text-muted-foreground">better name help artist remember your event</p>
-            <Input
-              id="eventName"
-              placeholder="e.g. Wedding Reception"
-              value={eventName}
-              onChange={(e) => setEventName(e.target.value)}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="clientName">Your Name</Label>
+                  <Input
+                    id="clientName"
+                    placeholder="John Doe"
+                    value={clientName}
+                    onChange={(e) => setClientName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="clientPhoneNumber">Phone Number</Label>
+                  <Input
+                    id="clientPhoneNumber"
+                    placeholder="9876543210"
+                    value={clientPhoneNumber}
+                    onChange={(e) => setClientPhoneNumber(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="eventName">Event Name</Label>
+                <Input
+                  id="eventName"
+                  placeholder="e.g. Wedding Reception"
+                  value={eventName}
+                  onChange={(e) => setEventName(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="eventAddress">Address</Label>
+                <Input
+                  id="eventAddress"
+                  placeholder="Street address"
+                  value={eventAddress}
+                  onChange={(e) => setEventAddress(e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="eventCity">City</Label>
+                  <Input
+                    id="eventCity"
+                    placeholder="City"
+                    value={eventCity}
+                    onChange={(e) => setEventCity(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="eventState">State</Label>
+                  <Input
+                    id="eventState"
+                    placeholder="State"
+                    value={eventState}
+                    onChange={(e) => setEventState(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="eventCountry">Country</Label>
+                  <Input
+                    id="eventCountry"
+                    placeholder="Country"
+                    value={eventCountry}
+                    onChange={(e) => setEventCountry(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="eventPincode">Pincode</Label>
+                  <Input
+                    id="eventPincode"
+                    placeholder="Pincode"
+                    value={eventPincode}
+                    onChange={(e) => setEventPincode(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2 h-full min-h-[300px] flex flex-col">
+              <Label>Select Location on Map</Label>
+              <div className="flex-1 rounded-lg overflow-hidden border border-white/10 mt-1 z-0 relative">
+                <div id="event-map" style={{ height: "100%", width: "100%", minHeight: "250px" }} />
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Lat: {eventLat.toFixed(4)}, Lng: {eventLng.toFixed(4)}
+              </p>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsBookingDialogOpen(false)}>
@@ -371,7 +558,7 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
             </Button>
             <Button
               onClick={handleConfirmBooking}
-              disabled={isBookingInFlight}
+              disabled={isBookingInFlight || !eventName || !eventAddress || !eventCity || !eventPincode || !clientName || !clientPhoneNumber}
             >
               {isBookingInFlight ? "Booking..." : "Confirm Booking"}
             </Button>
