@@ -5,6 +5,8 @@ import {
   submitArtistReview,
   updateBookingStatus,
   fetchArtistReviews,
+  payAdvance,
+  verifyArtistBookingPayment,
 } from "@/api/artists";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -14,6 +16,17 @@ import { BookingHeader } from "@/components/bookedArtistPage/BookingHeader";
 import { ArtistInfoCard } from "@/components/bookedArtistPage/ArtistInfoCard";
 import { RatingReviewForm } from "@/components/bookedArtistPage/RatingReviewForm";
 import { ReviewsList } from "@/components/bookedArtistPage/ReviewsList";
+import { type BookArtistResponse } from "@/api/artists";
+
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 const BookedArtist = () => {
   const { id } = useParams<{ id: string }>();
@@ -76,6 +89,57 @@ const BookedArtist = () => {
     },
   });
 
+  const payMutation = useMutation({
+    mutationFn: (bookingId: string) => payAdvance(bookingId),
+    onSuccess: async (resp: BookArtistResponse) => {
+      if (resp.success && resp.booking && resp.razorpayOrder) {
+        const res = await loadRazorpayScript();
+        if (!res) {
+          toast.error("Razorpay SDK failed to load.");
+          return;
+        }
+
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: resp.razorpayOrder.amount,
+          currency: resp.razorpayOrder.currency,
+          name: "BrookShow",
+          description: `Advance Payment for booking`,
+          order_id: resp.razorpayOrder.id,
+          handler: async (response: any) => {
+            try {
+              const verifyRes = await verifyArtistBookingPayment({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              });
+
+              if (verifyRes.success) {
+                toast.success("Payment successful! Booking confirmed.");
+                refetch();
+              } else {
+                toast.error(verifyRes.message || "Payment verification failed.");
+              }
+            } catch (err: any) {
+              toast.error(err.response?.data?.message || "Payment verification failed.");
+            }
+          },
+          theme: {
+            color: "#6366f1",
+          },
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.open();
+      } else {
+        toast.error(resp.message || "Failed to initiate payment.");
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "An error occurred.");
+    },
+  });
+
   const booking = data?.booking;
 
   if (isLoading) {
@@ -127,6 +191,8 @@ const BookedArtist = () => {
           booking={booking}
           onCancel={(id) => cancelMutation.mutate(id)}
           isCancelling={cancelMutation.isPending}
+          onPayNow={(id) => payMutation.mutate(id)}
+          isPaying={payMutation.isPending}
         />
         <ReviewsList
           reviews={reviewsData?.reviews || []}

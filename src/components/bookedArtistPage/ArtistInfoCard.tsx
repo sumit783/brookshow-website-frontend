@@ -21,6 +21,8 @@ interface ArtistInfoCardProps {
   booking: UserBooking;
   onCancel: (id: string) => void;
   isCancelling: boolean;
+  onPayNow?: (id: string) => void;
+  isPaying?: boolean;
 }
 
 const getImageUrl = (imagePath: string) => {
@@ -38,6 +40,8 @@ export const ArtistInfoCard = ({
   booking,
   onCancel,
   isCancelling,
+  onPayNow,
+  isPaying,
 }: ArtistInfoCardProps) => {
   const artist = booking.artistId;
   const service = booking.serviceId;
@@ -210,6 +214,17 @@ export const ArtistInfoCard = ({
               >
                 Contact Artist
               </Button>
+
+              {booking.status === "pending" && booking.paymentStatus === "unpaid" && onPayNow && (
+                <Button
+                  type="button"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold"
+                  onClick={() => onPayNow(booking._id)}
+                  disabled={isPaying}
+                >
+                  {isPaying ? "Processing..." : "Pay Now"}
+                </Button>
+              )}
               {/* <Button
                 type="button"
                 variant="outline"

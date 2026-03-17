@@ -343,6 +343,11 @@ export const updateBookingStatus = async (id: string, status: string): Promise<{
   return response.data;
 };
 
+export const payAdvance = async (id: string): Promise<BookArtistResponse> => {
+  const response = await client.post(`/api/user/bookings/${id}/pay-advance`);
+  return response.data;
+};
+
 export interface ArtistReview {
   id: string;
   clientId: string;
