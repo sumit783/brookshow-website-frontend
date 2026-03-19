@@ -7,6 +7,7 @@ interface MediaItem {
   src: string;
   type: 'image' | 'video';
   id: string;
+  height: number;
 }
 
 interface MasonryGridProps {
@@ -22,8 +23,18 @@ export const MasonryGrid = ({ images, videos, pageSize = 12 }: MasonryGridProps)
   // Combine and shuffle media items once per images/videos change
   const mediaItems: MediaItem[] = useMemo(() => {
     const combined: MediaItem[] = [
-      ...images.map((src, idx) => ({ src, type: 'image' as const, id: `img-${idx}` })),
-      ...videos.map((src, idx) => ({ src, type: 'video' as const, id: `vid-${idx}` }))
+      ...images.map((src, idx) => ({ 
+        src, 
+        type: 'image' as const, 
+        id: `img-${idx}`,
+        height: 200 + Math.random() * 200
+      })),
+      ...videos.map((src, idx) => ({ 
+        src, 
+        type: 'video' as const, 
+        id: `vid-${idx}`,
+        height: 250 + Math.random() * 150
+      }))
     ];
     return combined.sort(() => Math.random() - 0.5);
   }, [images, videos]);
@@ -48,7 +59,7 @@ export const MasonryGrid = ({ images, videos, pageSize = 12 }: MasonryGridProps)
                   src={item.src}
                   alt={`Portfolio ${startIdx + idx + 1}`}
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
-                  style={{ height: `${200 + Math.random() * 200}px` }}
+                  style={{ height: `${item.height}px` }}
                   skeletonClassName="rounded-lg"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -58,15 +69,29 @@ export const MasonryGrid = ({ images, videos, pageSize = 12 }: MasonryGridProps)
                 </div>
               </div>
             ) : (
-              <div className="relative">
-                <LazyImage
+              <div 
+                className="relative"
+                onMouseEnter={(e) => {
+                  const video = e.currentTarget.querySelector('video');
+                  if (video) video.play().catch(() => {});
+                }}
+                onMouseLeave={(e) => {
+                  const video = e.currentTarget.querySelector('video');
+                  if (video) {
+                    video.pause();
+                    video.currentTime = 0;
+                  }
+                }}
+              >
+                <video
                   src={item.src}
-                  alt={`Video ${startIdx + idx + 1}`}
+                  muted
+                  loop
+                  playsInline
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
-                  style={{ height: `${250 + Math.random() * 150}px` }}
-                  skeletonClassName="rounded-lg"
+                  style={{ height: `${item.height}px` }}
                 />
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/40 group-hover:opacity-0 transition-opacity duration-300 flex items-center justify-center">
                   <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     <Play className="w-6 h-6 text-gray-800 ml-1" />
                   </div>
@@ -138,16 +163,12 @@ export const MasonryGrid = ({ images, videos, pageSize = 12 }: MasonryGridProps)
                 />
               ) : (
                 <div className="relative aspect-video bg-black flex items-center justify-center">
-                  <LazyImage
+                  <video
                     src={selectedMedia.src}
-                    alt="Video thumbnail"
-                    className="w-full h-full object-cover"
+                    controls
+                    autoPlay
+                    className="w-full h-full max-h-[80vh] object-contain"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-20 h-20 bg-white/90 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
-                      <Play className="w-8 h-8 text-gray-800 ml-1" />
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
