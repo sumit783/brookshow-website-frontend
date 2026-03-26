@@ -339,7 +339,7 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="startDateTime" className="flex items-center gap-2">
-            <CalendarIcon className="w-4 h-4 text-accent" />
+            <CalendarIcon className="w-4 h-4 text-primary" />
             Start Date & Time
           </Label>
           <Input
@@ -352,7 +352,7 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
         </div>
         <div className="space-y-2">
           <Label htmlFor="endDateTime" className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-accent" />
+            <Clock className="w-4 h-4 text-primary" />
             End Date & Time
           </Label>
           <Input

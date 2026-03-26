@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -5,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import * as z from "zod";
 import { toast } from "sonner";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, Loader2 } from "lucide-react";
 import { SEO } from "@/components/SEO";
+import { sendContactMessage, type ContactMessageData } from "@/api/user";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -20,15 +22,29 @@ const contactSchema = z.object({
 type ContactFormData = z.infer<typeof contactSchema>;
 
 export default function Contact() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, handleSubmit, formState: { errors }, reset } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
   });
 
-  const onSubmit = (data: ContactFormData) => {
-    // Handle form submission
-    console.log("Contact form submitted:", data);
-    toast.success("Message sent successfully! We'll get back to you soon.");
-    reset();
+  const onSubmit = async (data: ContactFormData) => {
+    setIsSubmitting(true);
+    try {
+      const response = await sendContactMessage(data as ContactMessageData);
+      console.log("Contact API response:", response);
+      if (response.success) {
+        toast.success(response.message || "Message sent successfully! We'll get back to you soon.");
+        reset();
+      } else {
+        toast.error(response.message || "Failed to send message. Please try again.");
+      }
+    } catch (error: any) {
+      console.error("Contact form error:", error);
+      const errorMessage = error.response?.data?.message || error.message || "Something went wrong. Please try again later.";
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -150,8 +166,15 @@ export default function Contact() {
                   )}
                 </div>
 
-                <Button type="submit" variant="hero" size="lg" className="w-full">
-                  Send Message
+                <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Send Message"
+                  )}
                 </Button>
               </form>
             </CardContent>

@@ -55,3 +55,20 @@ export const fetchUserProfile = async (): Promise<UserProfileResponse> => {
     const response = await client.get<UserProfileResponse>('/api/user/profile');
     return response.data;
 };
+
+export interface ContactApiResponse {
+    success: boolean;
+    message: string;
+}
+
+export interface ContactMessageData {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+}
+
+export const sendContactMessage = async (data: ContactMessageData): Promise<ContactApiResponse> => {
+    const response = await client.post<ContactApiResponse>('/api/user/contact', data);
+    return response.data;
+};
