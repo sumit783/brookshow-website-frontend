@@ -125,10 +125,12 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
                 </select>
               )}
             </div>
-              <div className="flex gap-2">
-                <label htmlFor="ticket-persons" className="block text-sm mb-1 text-muted-foreground">Persons</label>
-                <p>{persons} x {selectedTicket?.price} = {total}</p>
+            {selectedTicket && (
+              <div className="flex items-center justify-between rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm">
+                <span className="text-muted-foreground">Allowed persons per ticket</span>
+                <span className="font-semibold text-foreground">{selectedTicket.allowedPersonsPerTicket ?? 1}</span>
               </div>
+            )}
             <div>
               <label htmlFor="ticket-name" className="block text-sm mb-1 text-muted-foreground">Name</label>
               <input
