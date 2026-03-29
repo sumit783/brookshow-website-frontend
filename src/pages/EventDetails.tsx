@@ -152,7 +152,7 @@ export default function EventDetails() {
           try {
             const response = await buyTicket({
               ticketTypeId: data.ticketTypeId,
-              quantity: data.persons,
+              quantity: data.quantity,
               buyerName: data.name,
               buyerPhone: data.phone.replace("+91 ", "") // Extract number only
             });

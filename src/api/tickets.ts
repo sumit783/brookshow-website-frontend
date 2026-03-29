@@ -16,6 +16,7 @@ export interface EventTicketType {
     id: string;
     name: string;
     price: number;
+    allowedPersonsPerTicket: number;
 }
 
 export interface Event {

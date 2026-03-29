@@ -7,7 +7,7 @@ import { toast } from "sonner";
 interface TicketDialogProps {
   open: boolean;
   onClose: () => void;
-  onPayNow: (data: { name: string; phone: string; persons: number; total: number; ticketTypeId: string }) => void;
+  onPayNow: (data: { name: string; phone: string; persons: number; quantity: number; total: number; ticketTypeId: string }) => void;
   eventId: string;
   currency?: string;
   isPaying?: boolean;
@@ -62,7 +62,9 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
 
   const selectedTicket = ticketTypes.find(t => t.id === selectedTicketId);
   const unitPrice = selectedTicket?.price || 0;
-  const total = Math.max(1, persons || 0) * unitPrice;
+  const allowedPerTicket = selectedTicket?.allowedPersonsPerTicket || 1;
+  const quantity = Math.ceil(Math.max(1, persons || 0) / allowedPerTicket);
+  const total = quantity * unitPrice;
 
   if (!open) return null;
 
@@ -123,7 +125,10 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
                 </select>
               )}
             </div>
-
+              <div className="flex gap-2">
+                <label htmlFor="ticket-persons" className="block text-sm mb-1 text-muted-foreground">Persons</label>
+                <p>{persons} x {selectedTicket?.price} = {total}</p>
+              </div>
             <div>
               <label htmlFor="ticket-name" className="block text-sm mb-1 text-muted-foreground">Name</label>
               <input
@@ -182,8 +187,8 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
               <span className="font-medium">{currency}{unitPrice.toFixed(2)}</span>
             </div>
             <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-muted-foreground">Quantity</span>
-              <span className="font-medium">{Math.max(1, persons || 0)}</span>
+              <span className="text-muted-foreground">Quantity (Tickets)</span>
+              <span className="font-medium">{quantity}</span>
             </div>
             <div className="h-px bg-white/10 my-2" />
             <div className="flex items-center justify-between text-base">
@@ -202,6 +207,7 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
                 name,
                 phone: `+91 ${phoneDigits}`,
                 persons: Math.max(1, persons || 0),
+                quantity,
                 total,
                 ticketTypeId: selectedTicketId
               })}
