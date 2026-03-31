@@ -16,7 +16,7 @@ interface TicketDialogProps {
 export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹", isPaying = false }: TicketDialogProps) => {
   const [name, setName] = useState("");
   const [phoneDigits, setPhoneDigits] = useState("");
-  const [persons, setPersons] = useState<number>(1);
+  const [quantity, setQuantity] = useState<number>(1);
   const [ticketTypes, setTicketTypes] = useState<EventTicketType[]>([]);
   const [selectedTicketId, setSelectedTicketId] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -32,7 +32,12 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
           if (parsed.phone) {
             setPhoneDigits(parsed.phone.replace("+91 ", ""));
           }
-          if (parsed.persons) setPersons(parsed.persons);
+          if (parsed.quantity) {
+            setQuantity(parsed.quantity);
+          } else if (parsed.persons) {
+            // Fallback for older data, assume 1 ticket if persons is present
+            setQuantity(1);
+          }
           if (parsed.ticketTypeId) setSelectedTicketId(parsed.ticketTypeId);
 
           // Note: cleaning up here might be too early if user closes and reopens,
@@ -63,8 +68,8 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
   const selectedTicket = ticketTypes.find(t => t.id === selectedTicketId);
   const unitPrice = selectedTicket?.price || 0;
   const allowedPerTicket = selectedTicket?.allowedPersonsPerTicket || 1;
-  const quantity = Math.ceil(Math.max(1, persons || 0) / allowedPerTicket);
   const total = quantity * unitPrice;
+  const totalPersons = quantity * allowedPerTicket;
 
   if (!open) return null;
 
@@ -168,14 +173,14 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
             </div>
 
             <div>
-              <label htmlFor="ticket-persons" className="block text-sm mb-1 text-muted-foreground">Number of Persons</label>
+              <label htmlFor="ticket-quantity" className="block text-sm mb-1 text-muted-foreground">No of tickets</label>
               <input
-                id="ticket-persons"
+                id="ticket-quantity"
                 type="number"
                 min={1}
                 className="w-full rounded-lg bg-background/60 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-accent focus:border-accent/40 transition-shadow shadow-inner"
-                value={persons}
-                onChange={(e) => setPersons(Number(e.target.value))}
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
                 placeholder="1"
                 aria-required="true"
               />
@@ -189,9 +194,15 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
               <span className="font-medium">{currency}{unitPrice.toFixed(2)}</span>
             </div>
             <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-muted-foreground">Quantity (Tickets)</span>
+              <span className="text-muted-foreground">No. of Tickets</span>
               <span className="font-medium">{quantity}</span>
             </div>
+            {totalPersons > 0 && (
+              <div className="flex items-center justify-between text-sm mb-2">
+                <span className="text-muted-foreground">Total Persons Allowed</span>
+                <span className="font-medium">{totalPersons}</span>
+              </div>
+            )}
             <div className="h-px bg-white/10 my-2" />
             <div className="flex items-center justify-between text-base">
               <span className="font-semibold">Total</span>
@@ -208,7 +219,7 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
               onClick={() => onPayNow({
                 name,
                 phone: `+91 ${phoneDigits}`,
-                persons: Math.max(1, persons || 0),
+                persons: totalPersons,
                 quantity,
                 total,
                 ticketTypeId: selectedTicketId

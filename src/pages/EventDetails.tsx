@@ -138,6 +138,7 @@ export default function EventDetails() {
             const ticketToSave = {
               ticketTypeId: data.ticketTypeId,
               persons: data.persons,
+              quantity: data.quantity,
               name: data.name,
               phone: data.phone,
             };
