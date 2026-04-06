@@ -1,4 +1,4 @@
-import { useState, ImgHTMLAttributes } from "react";
+import { useState, useRef, ImgHTMLAttributes } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface LazyImageProps extends ImgHTMLAttributes<HTMLImageElement> {
@@ -11,7 +11,7 @@ interface LazyImageProps extends ImgHTMLAttributes<HTMLImageElement> {
 export const LazyImage = ({
   src,
   alt,
-  fallbackSrc = "https://via.placeholder.com/400x300?text=Image",
+  fallbackSrc,
   className = "",
   skeletonClassName = "",
   onError,
@@ -19,6 +19,7 @@ export const LazyImage = ({
 }: LazyImageProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const hasFallback = useRef(false);
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -29,8 +30,9 @@ export const LazyImage = ({
     setHasError(true);
     if (onError) {
       onError(e);
-    } else {
-      // Set fallback image
+    } else if (fallbackSrc && !hasFallback.current) {
+      // Only apply fallback once — prevents infinite loop if fallback also fails
+      hasFallback.current = true;
       (e.target as HTMLImageElement).src = fallbackSrc;
     }
   };

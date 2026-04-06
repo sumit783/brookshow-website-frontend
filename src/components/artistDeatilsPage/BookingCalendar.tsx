@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -62,6 +62,7 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
   const [eventLng, setEventLng] = useState<number>(78.9629);
   const [clientName, setClientName] = useState<string>("");
   const [clientPhoneNumber, setClientPhoneNumber] = useState<string>("");
+  const [isGeocodingLoading, setIsGeocodingLoading] = useState(false);
 
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
   const [isRestored, setIsRestored] = useState(false);
@@ -127,6 +128,37 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
     }
   }, [isRestored, servicesData, persistenceKey]);
 
+  // Reverse geocode a lat/lng using Nominatim and populate address fields
+  const reverseGeocode = async (lat: number, lng: number) => {
+    setIsGeocodingLoading(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
+        { headers: { 'Accept-Language': 'en' } }
+      );
+      const data = await response.json();
+      if (data && data.address) {
+        const addr = data.address;
+        // Address line: road + suburb/neighbourhood
+        const road = addr.road || addr.pedestrian || addr.footway || '';
+        const suburb = addr.suburb || addr.neighbourhood || addr.quarter || '';
+        setEventAddress([road, suburb].filter(Boolean).join(', '));
+        // City: city > town > village > county
+        setEventCity(addr.city || addr.town || addr.village || addr.county || '');
+        // State
+        setEventState(addr.state || '');
+        // Country
+        setEventCountry(addr.country || 'India');
+        // Pincode / postcode
+        setEventPincode(addr.postcode || '');
+      }
+    } catch (err) {
+      console.error('Reverse geocoding failed', err);
+    } finally {
+      setIsGeocodingLoading(false);
+    }
+  };
+
   // Map state and effect
   useEffect(() => {
     if (!isBookingDialogOpen) return;
@@ -147,16 +179,20 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
 
       let marker = L.marker([eventLat, eventLng]).addTo(map);
 
-      map.on('click', (e) => {
+      map.on('click', async (e) => {
         const { lat, lng } = e.latlng;
         setEventLat(lat);
         setEventLng(lng);
-        
+
+        // Move marker immediately
         if (marker) {
           marker.setLatLng(e.latlng);
         } else {
           marker = L.marker(e.latlng).addTo(map);
         }
+
+        // Reverse geocode to auto-fill address fields
+        await reverseGeocode(lat, lng);
       });
 
       // Handle resize
@@ -382,29 +418,36 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
                   {priceData.available ? "Available" : "Not available"}
                 </Badge>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Base Price:</span>
-                <span className="font-semibold">₹{priceData.basePrice.toLocaleString('en-IN')} / {priceData.unit}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Total Price:</span>
-                <span className="font-bold">₹{priceData.price.toLocaleString('en-IN')}</span>
-              </div>
-              {typeof priceData.advance === 'number' && (
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Advance:</span>
-                  <span className="font-semibold">₹{priceData.advance.toLocaleString('en-IN')}</span>
-                </div>
-              )}
-              {priceData.duration && (
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <div>Start: {new Date(priceData.duration.start).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
-                  <div>End: {new Date(priceData.duration.end).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
-                </div>
-              )}
+
+              {priceData.available ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Base Price:</span>
+                    <span className="font-semibold">₹{priceData.basePrice?.toLocaleString('en-IN')} / {priceData.unit}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Total Price:</span>
+                    <span className="font-bold">₹{priceData.price?.toLocaleString('en-IN')}</span>
+                  </div>
+                  {typeof priceData.advance === 'number' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Advance:</span>
+                      <span className="font-semibold">₹{priceData.advance.toLocaleString('en-IN')}</span>
+                    </div>
+                  )}
+                  {priceData.duration && (
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <div>Start: {new Date(priceData.duration.start).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
+                      <div>End: {new Date(priceData.duration.end).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
+                    </div>
+                  )}
+                </>
+              ) : null}
+
               {priceData.message && (
-                <p className="text-sm">{priceData.message}</p>
+                <p className="text-sm font-medium text-destructive/80">{priceData.message}</p>
               )}
+
               {!priceData.available && priceData.conflicts && (
                 <div className="text-sm text-muted-foreground space-y-1">
                   {priceData.conflicts.bookings?.length ? (
@@ -420,7 +463,7 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
                 disabled={!priceData.available}
                 onClick={handleBookArtist}
               >
-                Book Artist (₹{priceData.advance})
+                {priceData.available ? `Book Artist (₹${priceData.advance?.toLocaleString('en-IN')})` : "Artist Unavailable"}
               </Button>
             </>
           )}
@@ -547,8 +590,18 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
               <div className="flex-1 rounded-lg overflow-hidden border border-white/10 mt-1 z-0 relative">
                 <div id="event-map" style={{ height: "100%", width: "100%", minHeight: "250px" }} />
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1">
-                Lat: {eventLat.toFixed(4)}, Lng: {eventLng.toFixed(4)}
+              <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                {isGeocodingLoading ? (
+                  <span className="inline-flex items-center gap-1">
+                    <svg className="animate-spin h-3 w-3 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                    Detecting address...
+                  </span>
+                ) : (
+                  <span>Lat: {eventLat.toFixed(4)}, Lng: {eventLng.toFixed(4)}</span>
+                )}
               </p>
             </div>
           </div>
