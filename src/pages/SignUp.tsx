@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, User, Mail, Phone, Globe, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import { Loader2, User, Mail, Phone, Globe, ArrowRight, ShieldCheck, Sparkles, ChevronLeft } from "lucide-react";
 import logo from "@/assets/logo.webp";
 import { SEO } from "@/components/SEO";
 import { registerUser, verifyRegistrationOtp } from "@/api/auth";
@@ -138,11 +138,21 @@ const SignUp = () => {
 
             {/* Right Side: Authentication Form */}
             <div className="flex items-center justify-center p-6 sm:p-12 relative">
-                {/* Mobile branding */}
                 <div className="lg:hidden absolute top-8 left-8 flex items-center gap-2">
                     <img src={logo} alt="BrookShow Logo" className="w-6 h-6 object-contain" />
                     <span className="font-bold text-xl">BrookShow</span>
                 </div>
+
+                {/* Back to Website Button */}
+                <Link 
+                    to="/" 
+                    className="absolute top-8 right-8 lg:left-12 lg:top-12 flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-white transition-smooth group z-20"
+                >
+                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-smooth">
+                        <ChevronLeft className="w-4 h-4" />
+                    </div>
+                    <span>Back to Website</span>
+                </Link>
 
                 <Card className="w-full max-w-md glass-modern border-0 relative z-10 fade-in-scale overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary" />
@@ -276,11 +286,35 @@ const SignUp = () => {
                     </CardContent>
 
                     <CardFooter className="flex flex-col gap-4 pt-4 border-t border-white/5 mt-4">
-                        <div className="text-center text-sm text-muted-foreground">
+                        <div className="text-center text-sm text-muted-foreground w-full">
                             Already have an account?{" "}
                             <Link to="/signin" className="text-primary font-bold hover:underline underline-offset-4">
                                 Sign in
                             </Link>
+                        </div>
+
+                        <div className="w-full flex items-center gap-4 text-primary/50 text-xs uppercase font-bold tracking-widest before:content-[''] before:flex-1 before:h-px before:bg-primary/10 after:content-[''] after:flex-1 after:h-px after:bg-primary/10 pt-2">
+                            Join as Partner
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 w-full">
+                            <Button
+                                variant="outline"
+                                className="h-10 border-primary/20 bg-primary/5 hover:bg-primary/10 text-xs font-bold transition-smooth hover:text-gray-200"
+                                asChild
+                            >
+                                <a href="https://artist.brookshow.com/signup" target="_blank" rel="noopener noreferrer">
+                                    Artist Signup
+                                </a>
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="h-10 border-accent/20 bg-accent/5 hover:bg-accent/10 text-xs font-bold transition-smooth hover:text-gray-200"
+                                asChild
+                            >
+                                <a href="https://eventplanner.brookshow.com/signup" target="_blank" rel="noopener noreferrer">
+                                    Planner Signup
+                                </a>
+                            </Button>
                         </div>
                     </CardFooter>
                 </Card>

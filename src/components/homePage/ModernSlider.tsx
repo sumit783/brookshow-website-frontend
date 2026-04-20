@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectCoverflow } from 'swiper/modules';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -7,6 +8,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-coverflow';
+import 'swiper/css/autoplay';
 
 interface SliderProps {
   children: React.ReactNode[];
@@ -19,6 +21,7 @@ interface SliderProps {
   loop?: boolean;
   speed?: number;
   className?: string;
+  pauseOnHover?: boolean;
 }
 
 export const ModernSlider = ({
@@ -31,9 +34,19 @@ export const ModernSlider = ({
   effect = 'slide',
   loop = false,
   speed = 600,
-  className = ''
+  className = '',
+  pauseOnHover = true
 }: SliderProps) => {
-  const navigationId = `navigation-${Math.random().toString(36).substr(2, 9)}`;
+  const navigationId = useMemo(() => `navigation-${Math.random().toString(36).substr(2, 9)}`, []);
+  
+  const autoplayConfig = useMemo(() => {
+    if (!autoplay) return false;
+    return {
+      delay: 4000,
+      disableOnInteraction: false,
+      pauseOnMouseEnter: !!pauseOnHover,
+    };
+  }, [autoplay, pauseOnHover]);
 
   return (
     <div className={`relative ${className}`}>
@@ -43,12 +56,7 @@ export const ModernSlider = ({
         spaceBetween={spaceBetween}
         loop={loop}
         speed={speed}
-        autoplay={autoplay ? {
-          delay: 4000,
-          disableOnInteraction: false,
-          pauseOnMouseEnter: true,
-          waitForTransition: true
-        } : false}
+        autoplay={autoplayConfig}
         navigation={navigation ? {
           prevEl: `.${navigationId}-prev`,
           nextEl: `.${navigationId}-next`,
@@ -124,9 +132,6 @@ export const ModernSlider = ({
         }
         .modern-swiper .swiper-slide {
           transition: transform 0.3s ease;
-        }
-        .modern-swiper .swiper-slide:hover {
-          transform: scale(1.02);
         }
       `}</style>
     </div>

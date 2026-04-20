@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, Mail, ArrowRight, ShieldCheck } from "lucide-react";
+import { Loader2, Mail, ArrowRight, ShieldCheck, ChevronLeft } from "lucide-react";
 import logo from "@/assets/logo.webp";
 import { SEO } from "@/components/SEO";
 import { requestLoginOtp, verifyLoginOtp } from "@/api/auth";
@@ -134,11 +134,21 @@ const SignIn = () => {
 
             {/* Right Side: Authentication Form */}
             <div className="flex items-center justify-center p-6 sm:p-12 relative">
-                {/* Mobile branding */}
                 <div className="lg:hidden absolute top-8 left-8 flex items-center gap-2">
                     <img src={logo} alt="BrookShow Logo" className="w-6 h-6 object-contain" />
                     <span className="font-bold text-xl">BrookShow</span>
                 </div>
+
+                {/* Back to Website Button */}
+                <Link 
+                    to="/" 
+                    className="absolute top-8 right-8 lg:left-12 lg:top-12 flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-white transition-smooth group z-20"
+                >
+                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-smooth">
+                        <ChevronLeft className="w-4 h-4" />
+                    </div>
+                    <span>Back to Website</span>
+                </Link>
 
                 <Card className="w-full max-w-md glass-modern border-0 relative z-10 fade-in-scale overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary" />
@@ -255,8 +265,8 @@ const SignIn = () => {
                                 className="h-10 border-primary/20 bg-primary/5 hover:bg-primary/10 text-xs font-bold transition-smooth hover:text-gray-200"
                                 asChild
                             >
-                                <a href="https://artist.brookshow.com" target="_blank" rel="noopener noreferrer">
-                                    Artist Dashboard
+                                <a href="https://artist.brookshow.com/login" target="_blank" rel="noopener noreferrer">
+                                    Artist Login
                                 </a>
                             </Button>
                             <Button
@@ -264,8 +274,8 @@ const SignIn = () => {
                                 className="h-10 border-accent/20 bg-accent/5 hover:bg-accent/10 text-xs font-bold transition-smooth hover:text-gray-200"
                                 asChild
                             >
-                                <a href="https://planner.brookshow.com" target="_blank" rel="noopener noreferrer">
-                                    Planner Dashboard
+                                <a href="https://eventplanner.brookshow.com/login" target="_blank" rel="noopener noreferrer">
+                                    Planner Login
                                 </a>
                             </Button>
                         </div>

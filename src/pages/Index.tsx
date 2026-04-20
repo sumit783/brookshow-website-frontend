@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { HeroSection } from "@/components/homePage/HeroSection";
 import { TopArtistsSection } from "@/components/homePage/TopArtistsSection";
 import { LiveTicketsSection } from "@/components/homePage/LiveTicketsSection";
 import { FeaturesSection } from "@/components/homePage/FeaturesSection";
 import { JoinSection } from "@/components/homePage/JoinSection";
 import { SEO } from "@/components/SEO";
+import { IntroLoader } from "@/components/IntroLoader";
 
 const Index = () => {
+  const [isHeroLoaded, setIsHeroLoaded] = useState(false);
+
   return (
     <>
       <SEO 
@@ -13,7 +17,11 @@ const Index = () => {
         description="Discover & book trusted Artists, DJs, Event Planners & more. Join BrookShow for verified artists, secure payments, and real-time QR ticketing."
         canonical="https://brookshow.com"
       />
-      <HeroSection />
+      
+      {/* Preloader - will stay until isHeroLoaded is true */}
+      <IntroLoader isLoading={!isHeroLoaded} />
+
+      <HeroSection onLoaded={() => setIsHeroLoaded(true)} />
       <TopArtistsSection />
       <LiveTicketsSection />
       <FeaturesSection />
