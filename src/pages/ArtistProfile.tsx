@@ -22,6 +22,7 @@ const ArtistProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
+  const [isUnavailableDialogOpen, setIsUnavailableDialogOpen] = useState(false);
 
   const { data: artistData, isLoading, error } = useQuery({
     queryKey: ['artistProfile', id],
@@ -126,7 +127,14 @@ const ArtistProfile = () => {
                     location={artist.location}
                     stats={artist.stats}
                     price={artist.price}
-                    onBookClick={() => setIsBookingDialogOpen(true)}
+                    isAvailable={artist.isAvailable}
+                    onBookClick={() => {
+                      if (artist.isAvailable) {
+                        setIsBookingDialogOpen(true);
+                      } else {
+                        setIsUnavailableDialogOpen(true);
+                      }
+                    }}
                   />
                 </CardHeader>
 
@@ -160,6 +168,29 @@ const ArtistProfile = () => {
                 isDialogView={true}
                 onSuccess={() => setIsBookingDialogOpen(false)}
               />
+            </div>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Unavailable Dialog */}
+        <Dialog open={isUnavailableDialogOpen} onOpenChange={setIsUnavailableDialogOpen}>
+          <DialogContent className="sm:max-w-[400px] bg-[#121214] border-white/10 p-0 overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-red-500/50" />
+            <DialogHeader className="p-6 pt-8">
+              <DialogTitle className="text-2xl font-bold text-center">
+                Bookings Paused
+              </DialogTitle>
+              <DialogDescription className="text-center text-muted-foreground text-base pt-2">
+                <strong>{artist.name}</strong> is not accepting new bookings at this moment. Please check back later or explore similar artists below.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="p-6 pt-0 flex justify-center">
+              <Button 
+                onClick={() => setIsUnavailableDialogOpen(false)}
+                className="w-full h-12 bg-white/5 hover:bg-white/10 text-white font-bold transition-all border border-white/10"
+              >
+                Understood
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

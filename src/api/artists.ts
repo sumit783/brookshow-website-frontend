@@ -40,6 +40,7 @@ export interface ArtistProfile {
     events: number;
     experience: string;
   };
+  isAvailable: boolean;
 }
 
 export const fetchArtistProfile = async (id: string): Promise<ArtistProfile> => {

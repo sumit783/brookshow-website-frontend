@@ -17,10 +17,11 @@ interface ProfileHeaderProps {
   location: string;
   stats: Stats;
   price?: number;
+  isAvailable?: boolean;
   onBookClick?: () => void;
 }
 
-export const ProfileHeader = ({ image, name, category, rating, location, stats, price, onBookClick }: ProfileHeaderProps) => {
+export const ProfileHeader = ({ image, name, category, rating, location, stats, price, isAvailable = true, onBookClick }: ProfileHeaderProps) => {
   return (
     <div className="flex flex-col gap-6">
       {/* Mobile Instagram Style Header */}
@@ -87,12 +88,19 @@ export const ProfileHeader = ({ image, name, category, rating, location, stats, 
               <span className="text-foreground/80 text-lg">{location}</span>
             </div>
             {typeof price === 'number' && (
-              <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-md shadow-sm hover:bg-white/[0.08] transition-all duration-300 group cursor-default">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.2em]">Starting</span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-base font-medium text-accent/80">₹</span>
-                  <span className="text-2xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent group-hover:from-accent group-hover:to-primary transition-all duration-500">{price}</span>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-md shadow-sm hover:bg-white/[0.08] transition-all duration-300 group cursor-default">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.2em]">Starting</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-base font-medium text-accent/80">₹</span>
+                    <span className="text-2xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent group-hover:from-accent group-hover:to-primary transition-all duration-500">{price}</span>
+                  </div>
                 </div>
+                {!isAvailable && (
+                  <Badge variant="outline" className="text-red-400 border-red-400/30 bg-red-400/5 px-3 py-1">
+                    Currently Unavailable
+                  </Badge>
+                )}
               </div>
             )}
           </div>
@@ -117,10 +125,14 @@ export const ProfileHeader = ({ image, name, category, rating, location, stats, 
             </div>
 
             <Button
-              className="px-8 h-12 bg-gradient-to-r from-primary to-accent font-bold text-base shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+              className={`px-8 h-12 font-bold text-base shadow-lg transition-all duration-300 ${
+                !isAvailable 
+                  ? 'bg-gradient-to-r from-red-900/40 to-red-800/40 border border-red-500/30 text-red-200/60 shadow-none hover:scale-100 cursor-pointer' 
+                  : 'bg-gradient-to-r from-primary to-accent text-white shadow-primary/20 hover:scale-105'
+              }`}
               onClick={onBookClick}
             >
-              Book Artist
+              {isAvailable ? "Book Artist" : "Artist Unavailable"}
             </Button>
           </div>
         </div>
@@ -148,10 +160,14 @@ export const ProfileHeader = ({ image, name, category, rating, location, stats, 
         )}
         <div className="flex gap-2">
           <Button
-            className="flex-1 h-10 bg-gradient-to-r from-primary to-accent font-bold text-sm shadow-lg shadow-primary/20"
+            className={`flex-1 h-10 font-bold text-sm shadow-lg transition-all ${
+              !isAvailable 
+                ? 'bg-gradient-to-r from-red-900/40 to-red-800/40 border border-red-500/20 text-red-200/50 shadow-none' 
+                : 'bg-gradient-to-r from-primary to-accent text-white shadow-primary/20'
+            }`}
             onClick={onBookClick}
           >
-            Book Now
+            {isAvailable ? "Book Now" : "Unavailable"}
           </Button>
         </div>
       </div>
