@@ -1,22 +1,34 @@
-import React, { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 
-interface IntroLoaderProps {
-  isLoading: boolean;
-}
-
-export const IntroLoader: React.FC<IntroLoaderProps> = ({ isLoading }) => {
-  const [shouldRender, setShouldRender] = useState(true);
+export const IntroLoader: React.FC = () => {
+  const [shouldRender, setShouldRender] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
 
   useEffect(() => {
-    if (!isLoading) {
-      setIsFadingOut(true);
-      const timer = setTimeout(() => {
-        setShouldRender(false);
-      }, 800); // Matches the fade-out duration
-      return () => clearTimeout(timer);
+    const isViewed = sessionStorage.getItem("introViewed");
+    
+    if (isViewed) {
+      setShouldRender(false);
+      return;
     }
-  }, [isLoading]);
+
+    // If not viewed, start the rendering and animation sequence
+    setShouldRender(true);
+
+    const animationTimer = setTimeout(() => {
+      setIsFadingOut(true);
+    }, 3000); // Matches the 3s SVG drawing animation
+
+    const removeTimer = setTimeout(() => {
+      setShouldRender(false);
+      sessionStorage.setItem("introViewed", "true");
+    }, 4000); // 3s animation + 1s fade-out duration
+
+    return () => {
+      clearTimeout(animationTimer);
+      clearTimeout(removeTimer);
+    };
+  }, []);
 
   if (!shouldRender) return null;
 

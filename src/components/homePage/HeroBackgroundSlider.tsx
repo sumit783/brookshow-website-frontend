@@ -3,20 +3,20 @@ import { ModernSlider } from "@/components/homePage/ModernSlider";
 import { LazyImage } from "@/components/ui/LazyImage";
 import { HeroImage, listHeroImages } from "@/api/hero";
 
-// Local fallbacks in case API is empty or loading
-import djCard from "@/assets/pexels-alex-andrews-271121-1983046.jpg";
-import artistCard from "@/assets/pexels-marc-schulte-656598-2952834.jpg";
-import eventCard from "@/assets/pexels-teddy-2263436.jpg";
-import bandCard from "@/assets/pexels-wendywei-1190298.jpg";
+// Local Hero Assets (Responsive)
+import desktop1 from "@/assets/desktop1.png";
+import desktop2 from "@/assets/desktop2.png";
+import tablet1 from "@/assets/tablet1.png";
+import tablet2 from "@/assets/tablet2.png";
+import phone1 from "@/assets/phone1.png";
+import phone2 from "@/assets/phone2.png";
 
-const fallbacks = [
-  { _id: 'f1', title: "DJ Performance", desktopUrl: djCard, tabletUrl: djCard, mobileUrl: djCard },
-  { _id: 'f2', title: "Artist Studio", desktopUrl: artistCard, tabletUrl: artistCard, mobileUrl: artistCard },
-  { _id: 'f3', title: "Event Planning", desktopUrl: eventCard, tabletUrl: eventCard, mobileUrl: eventCard },
-  { _id: 'f4', title: "Live Band", desktopUrl: bandCard, tabletUrl: bandCard, mobileUrl: bandCard },
+const localHeroes = [
+  { _id: 'l1', title: "BrookShow Elite", desktopUrl: desktop1, tabletUrl: tablet1, mobileUrl: phone1 },
+  { _id: 'l2', title: "BrookShow Premium", desktopUrl: desktop2, tabletUrl: tablet2, mobileUrl: phone2 },
 ];
 
-export const HeroBackgroundSlider = ({ onLoaded }: { onLoaded?: () => void }) => {
+export const HeroBackgroundSlider = () => {
   const [images, setImages] = useState<HeroImage[]>([]);
   const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +33,7 @@ export const HeroBackgroundSlider = ({ onLoaded }: { onLoaded?: () => void }) =>
     handleResize();
     window.addEventListener('resize', handleResize);
 
-    // Fetch dynamic hero images
+    // Fetch dynamic hero images independently
     const fetchImages = async () => {
       try {
         const fetched = await listHeroImages();
@@ -44,22 +44,16 @@ export const HeroBackgroundSlider = ({ onLoaded }: { onLoaded?: () => void }) =>
         console.error("Failed to fetch hero images:", error);
       } finally {
         setIsLoading(false);
-        // Signal that hero is ready after API response
-        // buffer for cursive animation to at least start/look good
-        setTimeout(() => {
-          onLoaded?.();
-        }, 1500);
       }
     };
 
     fetchImages();
 
     return () => window.removeEventListener('resize', handleResize);
-  }, [onLoaded]);
+  }, []);
 
-  // Use ONLY API images as requested. 
-  // We keep fallbacks only as a structural safety if images are empty.
-  const displayImages = images.length > 0 ? images : [];
+  // Combine local responsive images with API images
+  const displayImages = [...localHeroes, ...images];
 
   const slideElements = displayImages.map((bg) => {
     // Select URL based on device type

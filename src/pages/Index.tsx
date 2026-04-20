@@ -8,8 +8,6 @@ import { SEO } from "@/components/SEO";
 import { IntroLoader } from "@/components/IntroLoader";
 
 const Index = () => {
-  const [isHeroLoaded, setIsHeroLoaded] = useState(false);
-
   return (
     <>
       <SEO 
@@ -18,10 +16,10 @@ const Index = () => {
         canonical="https://brookshow.com"
       />
       
-      {/* Preloader - will stay until isHeroLoaded is true */}
-      <IntroLoader isLoading={!isHeroLoaded} />
+      {/* Preloader - manages its own session-based state */}
+      <IntroLoader />
 
-      <HeroSection onLoaded={() => setIsHeroLoaded(true)} />
+      <HeroSection />
       <TopArtistsSection />
       <LiveTicketsSection />
       <FeaturesSection />

@@ -3,13 +3,13 @@ import { HeroBackgroundSlider } from "./HeroBackgroundSlider";
 import { useNavigate } from "react-router-dom";
 import downArrow from "@/assets/down-arrow.png";
 
-export const HeroSection = ({ onLoaded }: { onLoaded?: () => void }) => {
+export const HeroSection = () => {
   const navigate = useNavigate();
   return (
     <div className="flex flex-col w-full">
       {/* Container for Slider and Scroll Indicator */}
       <div className="relative w-full h-screen overflow-hidden bg-black/20">
-        <HeroBackgroundSlider onLoaded={onLoaded} />
+        <HeroBackgroundSlider />
         
         {/* Scroll Indicator - Horizontally centered at the bottom */}
         <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center justify-center animate-bounce z-20 gap-2">
