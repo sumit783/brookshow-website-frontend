@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 type Stats = {
   events: number;
-  experience: string;
+  experience: string | number;
 };
 
 interface ProfileHeaderProps {

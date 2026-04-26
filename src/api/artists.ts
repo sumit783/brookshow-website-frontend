@@ -38,7 +38,7 @@ export interface ArtistProfile {
   };
   stats: {
     events: number;
-    experience: string;
+    experience: string | number;
   };
   isAvailable: boolean;
 }
