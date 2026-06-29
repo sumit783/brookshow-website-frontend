@@ -19,7 +19,7 @@ export const FloatingCards = () => {
       <div className="glass-modern rounded-2xl overflow-hidden shadow-strong hover-glow transition-smooth">
         <div className="relative">
           <img
-            src={card.image}
+            src={typeof card.image === 'string' ? card.image : (card.image as any).src || card.image}
             alt={card.title}
             className="w-full h-48 object-cover group-hover:scale-110 transition-all duration-500"
           />

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -20,7 +20,7 @@ const loginSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
 });
 
-const SignIn = () => {
+const SignInContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirectTo = searchParams.get("redirectTo") || "/";
@@ -287,5 +287,16 @@ const SignIn = () => {
     );
 };
 
-export default SignIn;
+const SignIn = () => {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            </div>
+        }>
+            <SignInContent />
+        </Suspense>
+    );
+};
 
+export default SignIn;

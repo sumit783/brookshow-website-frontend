@@ -18,7 +18,7 @@ export const LazyImage = ({
   ...props
 }: LazyImageProps) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  const [, setHasError] = useState(false);
   const hasFallback = useRef(false);
   const imgRef = useRef<HTMLImageElement>(null);
 

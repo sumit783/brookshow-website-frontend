@@ -1,4 +1,4 @@
-import { Calendar, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 interface EventMainContentProps {
   description: string;

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Users, MapPin } from "lucide-react";
+import { Calendar, Clock, MapPin } from "lucide-react";
 
 interface EventSidebarProps {
   price: string;

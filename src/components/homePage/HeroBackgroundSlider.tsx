@@ -19,7 +19,7 @@ const localHeroes = [
 export const HeroBackgroundSlider = () => {
   const [images, setImages] = useState<HeroImage[]>([]);
   const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Determine initial device type
