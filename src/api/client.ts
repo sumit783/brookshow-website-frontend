@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { toast } from "sonner";
 
-export const API_BASE_URI = import.meta.env.VITE_API_BASE_URI || 'http://localhost:5000';
-const API_KEY = import.meta.env.VITE_API_KEY || "gLzOQGmoJk4b92oJcisx3y4KMFcecp";
+export const API_BASE_URI = process.env.NEXT_PUBLIC_API_BASE_URI || 'http://localhost:5000';
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY || "gLzOQGmoJk4b92oJcisx3y4KMFcecp";
 
 const client = axios.create({
   baseURL: API_BASE_URI,

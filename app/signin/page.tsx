@@ -1,5 +1,7 @@
+"use client";
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,9 +21,9 @@ const loginSchema = z.object({
 });
 
 const SignIn = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const redirectTo = location.state?.redirectTo || "/";
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectTo = searchParams.get("redirectTo") || "/";
     const [step, setStep] = useState<"email" | "otp">("email");
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
@@ -67,7 +69,7 @@ const SignIn = () => {
                     localStorage.setItem("token", response.jwtToken);
                     localStorage.setItem("user", JSON.stringify(response.user));
                 }
-                navigate(redirectTo);
+                router.push(redirectTo);
             } else {
                 toast.error(response.message || "Invalid OTP");
             }
@@ -95,7 +97,7 @@ const SignIn = () => {
                 </div>
 
                 <div className="relative z-10 flex items-center gap-2 slide-in-up">
-                    <img src={logo} alt="BrookShow Logo" className="w-auto object-contain" />
+                    <img src={logo.src} alt="BrookShow Logo" className="w-auto object-contain h-[26px] md:h-[30px]" />
                     {/* <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
                         BrookShow
                     </h2> */}
@@ -135,13 +137,12 @@ const SignIn = () => {
             {/* Right Side: Authentication Form */}
             <div className="flex items-center justify-center p-6 sm:p-12 relative">
                 <div className="lg:hidden absolute top-8 left-8 flex items-center gap-2">
-                    <img src={logo} alt="BrookShow Logo" className="w-6 h-6 object-contain" />
+                    <img src={logo.src} alt="BrookShow Logo" className="w-6 h-6 object-contain" />
                     <span className="font-bold text-xl">BrookShow</span>
                 </div>
 
                 {/* Back to Website Button */}
-                <Link 
-                    to="/" 
+                <Link href="/" 
                     className="absolute top-8 right-8 lg:left-12 lg:top-12 flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-white transition-smooth group z-20"
                 >
                     <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-smooth">
@@ -251,7 +252,7 @@ const SignIn = () => {
                             New here?
                         </div>
                         <Button variant="outline" className="w-full h-12 border-white/10 bg-transparent hover:bg-white/5 transition-smooth" asChild>
-                            <Link to="/signup">
+                            <Link href="/signup">
                                 Create an Account
                             </Link>
                         </Button>

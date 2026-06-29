@@ -1,15 +1,16 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+"use client";
+import { useRouter, useParams } from "next/navigation";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Star, MapPin } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { BookingCalendar } from "@/components/artistDeatilsPage/BookingCalendar";
 import { ProfileHeader } from "@/components/artistDeatilsPage/ProfileHeader";
 import { AboutSection } from "@/components/artistDeatilsPage/AboutSection";
 import { Specialties } from "@/components/artistDeatilsPage/Specialties";
-import { fetchArtistProfile, type ArtistProfile, fetchSimilarArtists, type SimilarArtist, fetchArtistReviews, type ArtistReview } from "@/api/artists";
+import { fetchArtistProfile, type ArtistProfile, fetchSimilarArtists, fetchArtistReviews } from "@/api/artists";
 import { API_BASE_URI } from "@/api/client";
 import { ArtistProfileSkeleton } from "@/components/skeletons/ArtistProfileSkeleton";
 import { PortfolioSection } from "@/components/artistDeatilsPage/PortfolioSection";
@@ -20,7 +21,7 @@ import { SEO } from "@/components/SEO";
 
 const ArtistProfile = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
   const [isUnavailableDialogOpen, setIsUnavailableDialogOpen] = useState(false);
 
@@ -68,7 +69,7 @@ const ArtistProfile = () => {
           <p className="text-muted-foreground mb-4">
             {error ? 'Failed to load artist profile. Please try again later.' : 'The artist you are looking for does not exist.'}
           </p>
-          <Button onClick={() => navigate('/')}>Go Back Home</Button>
+          <Button onClick={() => router.push('/')}>Go Back Home</Button>
         </div>
       </div>
     );
@@ -108,7 +109,7 @@ const ArtistProfile = () => {
             {/* Back Button */}
             <Button
               variant="outline"
-              onClick={() => navigate('/')}
+              onClick={() => router.push('/')}
               className="mb-6 sm:mb-8 glass-modern hover-neon gap-2 w-full sm:w-auto"
             >
               <ArrowLeft className="w-4 h-4" />

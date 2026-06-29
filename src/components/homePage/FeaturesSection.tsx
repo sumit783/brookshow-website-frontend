@@ -1,4 +1,6 @@
+"use client";
 import { Shield, CreditCard, Smartphone } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const features = [
   {
@@ -18,21 +20,35 @@ const features = [
   }
 ];
 
+interface RandomStyle {
+  left: string;
+  top: string;
+  animationDelay: string;
+  transform: string;
+}
+
 export const FeaturesSection = () => {
+  const [randomStyles, setRandomStyles] = useState<RandomStyle[]>([]);
+
+  useEffect(() => {
+    const styles = [...Array(25)].map(() => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      animationDelay: `${Math.random() * 5}s`,
+      transform: `scale(${0.5 + Math.random() * 0.5})`,
+    }));
+    setRandomStyles(styles);
+  }, []);
+
   return (
     <section className="countdown-section py-16 md:py-28 lg:py-32 md:px-6 relative overflow-hidden">
       {/* Moving Background */}
       <div className="absolute inset-0">
-        {[...Array(25)].map((_, i) => (
+        {randomStyles.map((style, i) => (
           <div
             key={i}
             className="absolute w-2 h-2 bg-gradient-primary rounded-full opacity-20 floating-card"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              transform: `scale(${0.5 + Math.random() * 0.5})`,
-            }}
+            style={style}
           />
         ))}
       </div>

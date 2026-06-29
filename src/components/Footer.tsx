@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import logo from "@/assets/logo.webp";
 
 export const Footer = () => {
@@ -7,7 +7,7 @@ export const Footer = () => {
       <div className="container mx-auto max-w-6xl">
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-6">
-            <img src={logo} alt="BrookShow Logo" className="w-auto h-14 object-contain" />
+            <img src={logo.src} alt="BrookShow Logo" className="w-auto h-14 object-contain" />
             {/* <span className="text-lg font-bold font-heading">BrookShow</span> */}
           </div>
           
@@ -17,14 +17,14 @@ export const Footer = () => {
           
           <div className="flex justify-center space-x-8">
             <Link 
-              to="/privacy" 
+              href="/privacy" 
               className="text-muted-foreground hover:text-accent transition-smooth"
             >
               Privacy Policy
             </Link>
             <span className="text-muted-foreground">|</span>
             <Link 
-              to="/terms" 
+              href="/terms" 
               className="text-muted-foreground hover:text-accent transition-smooth"
             >
               Terms & Conditions

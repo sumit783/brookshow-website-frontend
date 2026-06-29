@@ -1,6 +1,7 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Users, MapPin } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 type EventRecord = Record<string, {
   id: number;
@@ -22,7 +23,7 @@ interface RecommendedEventsProps {
 }
 
 function RecommendedEvents({ events, currentId }: RecommendedEventsProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   return (
     <section className="py-16 md:py-20 px-6">
       <div className="container mx-auto max-w-6xl">
@@ -120,7 +121,7 @@ function RecommendedEvents({ events, currentId }: RecommendedEventsProps) {
                         variant="ticket"
                         size="lg"
                         className="group relative w-full h-12 text-base font-bold rounded-xl bg-gradient-to-r from-primary to-accent transition-all duration-500 shadow-lg hover:shadow-primary/30 border border-white/20 overflow-hidden"
-                        onClick={() => navigate(`/events/${ev.id}`)}
+                        onClick={() => router.push(`/events/${ev.id}`)}
                       >
                         <span className="relative z-10">View Details</span>
                         <div className="pointer-events-none absolute inset-0 -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/20 to-transparent" />

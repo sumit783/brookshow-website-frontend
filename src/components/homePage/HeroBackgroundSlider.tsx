@@ -56,10 +56,11 @@ export const HeroBackgroundSlider = () => {
   const displayImages = [...localHeroes, ...images];
 
   const slideElements = displayImages.map((bg) => {
-    // Select URL based on device type
-    let imageUrl = bg.desktopUrl;
-    if (deviceType === 'mobile' && bg.mobileUrl) imageUrl = bg.mobileUrl;
-    else if (deviceType === 'tablet' && bg.tabletUrl) imageUrl = bg.tabletUrl;
+    let rawUrl = bg.desktopUrl;
+    if (deviceType === 'mobile' && bg.mobileUrl) rawUrl = bg.mobileUrl;
+    else if (deviceType === 'tablet' && bg.tabletUrl) rawUrl = bg.tabletUrl;
+
+    const imageUrl = typeof rawUrl === 'string' ? rawUrl : (rawUrl as any)?.src || rawUrl;
 
     return (
       <div key={bg._id} className="relative w-full h-full">

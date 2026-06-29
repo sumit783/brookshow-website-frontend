@@ -1,5 +1,6 @@
+"use client";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { Star, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTopArtists, type TopArtist } from "@/api/artists";
@@ -8,7 +9,7 @@ import { TopArtistsSkeleton } from "@/components/skeletons/TopArtistsSkeleton";
 import { LazyImage } from "@/components/ui/LazyImage";
 
 export const TopArtistsSection = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   
   const { data, isLoading, error } = useQuery({
     queryKey: ['topArtists'],
@@ -146,7 +147,7 @@ export const TopArtistsSection = () => {
                       variant="hero" 
                       size="lg" 
                       className="w-full rounded-lg bg-gradient-primary text-white font-semibold hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg group-hover:shadow-glow"
-                      onClick={() => navigate(`/artists/${artist.id}`)}
+                      onClick={() => router.push(`/artists/${artist.id}`)}
                     >
                       View Details
                     </Button>
@@ -168,7 +169,7 @@ export const TopArtistsSection = () => {
         )}
         
         <div className="text-center">
-          <Button onClick={() => navigate("/artists")} variant="outline" size="xl" className="glass-modern hover-neon">
+          <Button onClick={() => router.push("/artists")} variant="outline" size="xl" className="glass-modern hover-neon">
             View All Artists
           </Button>
         </div>

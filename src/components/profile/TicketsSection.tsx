@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+"use client";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +22,7 @@ export const TicketsSection = ({ tickets }: TicketsSectionProps) => {
           <CardContent className="flex flex-col items-center justify-center p-8 text-center">
             <TicketIcon className="h-10 w-10 text-muted-foreground/50 mb-3" />
             <p className="text-muted-foreground font-medium">No tickets purchased yet</p>
-            <Link to="/events">
+            <Link href="/events">
               <Button variant="link" className="mt-2">Browse Events</Button>
             </Link>
           </CardContent>
@@ -29,7 +30,7 @@ export const TicketsSection = ({ tickets }: TicketsSectionProps) => {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {tickets.map((ticket) => (
-            <Link to={`/ticket/${ticket.id}`} key={ticket.id}>
+            <Link href={`/ticket/${ticket.id}`} key={ticket.id}>
               <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">{ticket.event.title}</CardTitle>

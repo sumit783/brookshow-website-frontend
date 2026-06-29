@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router-dom";
+"use client";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +12,7 @@ interface BookingsSectionProps {
 }
 
 export const BookingsSection = ({ bookings }: BookingsSectionProps) => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <div className="space-y-4">
@@ -73,7 +74,7 @@ export const BookingsSection = ({ bookings }: BookingsSectionProps) => {
                       const start = booking.startDate || booking.date;
                       const end = booking.endDate || booking.date;
                       if (booking.id) {
-                        navigate(`/bookings/${booking.id}?startDate=${encodeURIComponent(start)}&endDate=${encodeURIComponent(end)}`);
+                        router.push(`/bookings/${booking.id}?startDate=${encodeURIComponent(start)}&endDate=${encodeURIComponent(end)}`);
                       }
                     }}
                   >

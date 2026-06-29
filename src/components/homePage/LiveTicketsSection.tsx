@@ -1,5 +1,6 @@
+"use client";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchEvents, type Event } from "@/api/events";
@@ -7,7 +8,7 @@ import { API_BASE_URI } from "@/api/client";
 import { LiveTicketsSkeleton } from "@/components/skeletons/LiveTicketsSkeleton";
 
 export const LiveTicketsSection = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['events'],
@@ -145,7 +146,7 @@ export const LiveTicketsSection = () => {
                         variant="hero" 
                         size="lg" 
                         className="w-full rounded-lg bg-gradient-primary text-white font-semibold hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg group-hover:shadow-glow"
-                        onClick={() => navigate(`/events/${event.id}`)}
+                        onClick={() => router.push(`/events/${event.id}`)}
                       >
                         View Details
                       </Button>
