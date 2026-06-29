@@ -45,7 +45,6 @@ export function ArtistJoinDialog({ open, onOpenChange }: ArtistJoinDialogProps) 
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
-  const [eventsCompleted, setEventsCompleted] = useState("");
   const [experienceYears, setExperienceYears] = useState("");
 
   const [pendingSocial, setPendingSocial] = useState<{ platform: string; url: string }>({ platform: "", url: "" });

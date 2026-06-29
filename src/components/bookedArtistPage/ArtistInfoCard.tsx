@@ -55,14 +55,6 @@ export const ArtistInfoCard = ({
     }
   };
 
-  const handleRequestInvoice = () => {
-    const email = "adityatrjara@gmail.com";
-    const body = `reqest invoice for :${booking._id}`;
-    const mailtoUrl = `mailto:${email}?body=${encodeURIComponent(body)}`;
-    console.log("Opening mailto:", mailtoUrl);
-    window.open(mailtoUrl, "_blank");
-  };
-
     const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "confirmed":

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { fetchTicketDetails, Ticket } from "@/api/tickets";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Calendar, MapPin, Phone, Users, CheckCircle, ArrowLeft } from "lucide-react";
+import { Loader2, Calendar, MapPin, CheckCircle, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { API_BASE_URI } from "@/api/client";
@@ -59,7 +59,7 @@ const TicketDetails = () => {
         );
     }
 
-    const { eventId, ticketTypeId, buyerName, buyerPhone, persons, qrDataUrl, scanned, isValide } = ticket;
+    const { eventId, ticketTypeId, buyerName, persons, qrDataUrl, scanned, isValide } = ticket;
 
     const getImageUrl = (imagePath: string) => {
         if (!imagePath) return '';

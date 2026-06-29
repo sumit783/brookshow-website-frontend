@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 interface BookingHeaderProps {
@@ -6,7 +5,7 @@ interface BookingHeaderProps {
   onBack: () => void;
 }
 
-export const BookingHeader = ({ status, onBack }: BookingHeaderProps) => {
+export const BookingHeader = ({ onBack }: BookingHeaderProps) => {
 
 
   return (
