@@ -1,5 +1,6 @@
+"use client";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { ArtistsFilters } from "@/components/artists/ArtistsFilters";
 import { ArtistCard } from "@/components/artists/ArtistCard";
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +11,7 @@ import { DateRange } from "react-day-picker";
 import { SEO } from "@/components/SEO";
 
 export default function Artists() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedTalent, setSelectedTalent] = useState<string>("all");
@@ -113,7 +114,7 @@ export default function Artists() {
                     price: artist.price,
                   }}
                   index={index}
-                  onViewProfile={(id) => navigate(`/artists/${id}`)}
+                  onViewProfile={(id) => router.push(`/artists/${id}`)}
                 />
               ))}
             </div>

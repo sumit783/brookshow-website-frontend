@@ -1,5 +1,6 @@
+"use client";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { Search, Sparkles } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
 import { EventsFilters } from "@/components/events/EventsFilters";
@@ -12,7 +13,7 @@ import { SEO } from "@/components/SEO";
 
 
 const Events = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -147,7 +148,7 @@ const Events = () => {
                     category: event.category || "Other",
                   }}
                   index={index}
-                  onViewDetails={(id) => navigate(`/events/${event.id}`)}
+                  onViewDetails={() => router.push(`/events/${event.id}`)}
                 />
               </div>
             ))}

@@ -1,4 +1,4 @@
-import { useState, useRef, ImgHTMLAttributes } from "react";
+import { useState, useRef, ImgHTMLAttributes,useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface LazyImageProps extends ImgHTMLAttributes<HTMLImageElement> {
@@ -20,6 +20,13 @@ export const LazyImage = ({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const hasFallback = useRef(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setIsLoading(false);
+    }
+  }, [src]);
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -43,6 +50,7 @@ export const LazyImage = ({
         <Skeleton className={`absolute inset-0 ${skeletonClassName}`} />
       )}
       <img
+        ref={imgRef}
         src={src}
         alt={alt}
         className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}

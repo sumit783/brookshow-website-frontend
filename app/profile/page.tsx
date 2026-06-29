@@ -1,5 +1,6 @@
+"use client";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { fetchUserProfile, UserProfileResponse } from "@/api/user";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
@@ -7,9 +8,10 @@ import { toast } from "sonner";
 import { UserInfoSection } from "@/components/profile/UserInfoSection";
 import { TicketsSection } from "@/components/profile/TicketsSection";
 import { BookingsSection } from "@/components/profile/BookingsSection";
+import { SEO } from "@/components/SEO";
 
 const Profile = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [profileData, setProfileData] = useState<UserProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +38,7 @@ const Profile = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     toast.success("Logged out successfully");
-    navigate("/signin");
+    router.push("/signin");
   };
 
   if (loading) {
@@ -59,6 +61,10 @@ const Profile = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 pt-24 max-w-4xl space-y-8">
+      <SEO 
+        title="My Profile - BrookShow"
+        description="Manage your BrookShow account, view bookings, and update your profile details."
+      />
       {/* User Info Section */}
       <UserInfoSection user={user} onLogout={handleLogout} />
 

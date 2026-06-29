@@ -1,3 +1,4 @@
+"use client";
 import {useEffect, useState} from "react";
 
 export const IntroLoader: React.FC = () => {
@@ -122,3 +123,4 @@ export const IntroLoader: React.FC = () => {
     </div>
   );
 };
+

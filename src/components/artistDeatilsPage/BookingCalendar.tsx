@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { Calendar } from "@/components/ui/calendar";
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, CheckCircle, Calendar as CalendarIcon } from "lucide-react";
+import { Clock, Calendar as CalendarIcon } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchArtistServices, type ArtistService, fetchBookingPrice, bookArtist, verifyArtistBookingPayment } from "@/api/artists";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -47,8 +47,8 @@ const loadRazorpayScript = () => {
   });
 };
 
-export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onSuccess }: BookingCalendarProps) => {
-  const navigate = useNavigate();
+export const BookingCalendar = ({ artistName, artistId, isDialogView, onSuccess }: BookingCalendarProps) => {
+  const router = useRouter();
   const [startDateTime, setStartDateTime] = useState<string>("");
   const [endDateTime, setEndDateTime] = useState<string>("");
   const [selectedService, setSelectedService] = useState<ArtistService | undefined>(undefined);
@@ -258,7 +258,7 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
         }
 
         const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
           amount: resp.razorpayOrder.amount,
           currency: resp.razorpayOrder.currency,
           name: "BrookShow",
@@ -277,7 +277,7 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
                 localStorage.removeItem(persistenceKey);
                 setIsBookingDialogOpen(false);
                 if (onSuccess) onSuccess();
-                navigate(`/bookings/${resp.booking?._id}`);
+                router.push(`/bookings/${resp.booking?._id}`);
               } else {
                 toast.error(verifyRes.message || "Payment verification failed.");
               }
@@ -298,7 +298,7 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
         localStorage.removeItem(persistenceKey);
         setIsBookingDialogOpen(false);
         if (onSuccess) onSuccess();
-        navigate(`/bookings/${resp.booking._id}`);
+        router.push(`/bookings/${resp.booking._id}`);
       } else {
         toast.error(resp.message || "Something went wrong.");
       }
@@ -331,7 +331,7 @@ export const BookingCalendar = ({ artistName, price, artistId, isDialogView, onS
       };
       localStorage.setItem(persistenceKey, JSON.stringify(bookingToSave));
 
-      navigate("/signin", { state: { redirectTo: window.location.pathname } });
+      router.push(`/signin?redirectTo=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
     setIsBookingDialogOpen(true);

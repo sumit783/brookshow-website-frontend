@@ -1,5 +1,7 @@
+"use client";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -22,7 +24,7 @@ const registerSchema = z.object({
 });
 
 const SignUp = () => {
-    const navigate = useNavigate();
+    const router = useRouter();
     const [step, setStep] = useState<"register" | "otp">("register");
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
@@ -71,7 +73,7 @@ const SignUp = () => {
                     localStorage.setItem("token", response.jwtToken);
                     localStorage.setItem("user", JSON.stringify(response.user));
                 }
-                navigate("/");
+                router.push("/");
             } else {
                 toast.error(response.message || "Invalid OTP");
             }
@@ -99,7 +101,7 @@ const SignUp = () => {
                 </div>
 
                 <div className="relative z-10 flex items-center gap-2 slide-in-up">
-                    <img src={logo} alt="BrookShow Logo" className="w-auto object-contain" />
+                    <img src={logo.src} alt="BrookShow Logo" className="w-auto object-contain h-[26px] md:h-[30px]" />
                     {/* <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
                         BrookShow
                     </h2> */}
@@ -139,13 +141,12 @@ const SignUp = () => {
             {/* Right Side: Authentication Form */}
             <div className="flex items-center justify-center p-6 sm:p-12 relative">
                 <div className="lg:hidden absolute top-8 left-8 flex items-center gap-2">
-                    <img src={logo} alt="BrookShow Logo" className="w-6 h-6 object-contain" />
+                    <img src={logo.src} alt="BrookShow Logo" className="w-6 h-6 object-contain" />
                     <span className="font-bold text-xl">BrookShow</span>
                 </div>
 
                 {/* Back to Website Button */}
-                <Link 
-                    to="/" 
+                <Link href="/" 
                     className="absolute top-8 right-8 lg:left-12 lg:top-12 flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-white transition-smooth group z-20"
                 >
                     <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-smooth">
@@ -288,7 +289,7 @@ const SignUp = () => {
                     <CardFooter className="flex flex-col gap-4 pt-4 border-t border-white/5 mt-4">
                         <div className="text-center text-sm text-muted-foreground w-full">
                             Already have an account?{" "}
-                            <Link to="/signin" className="text-primary font-bold hover:underline underline-offset-4">
+                            <Link href="/signin" className="text-primary font-bold hover:underline underline-offset-4">
                                 Sign in
                             </Link>
                         </div>

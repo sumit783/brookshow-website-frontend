@@ -1,18 +1,17 @@
 // API Configuration
-const BASE_URI = import.meta.env.VITE_API_BASE_URI || 'http://localhost:5000';
+const BASE_URI = process.env.NEXT_PUBLIC_API_BASE_URI || 'http://localhost:5000';
 export const API_BASE_URI = BASE_URI;
 
 // Get API key from env or use fallback
-const envApiKey = import.meta.env.VITE_API_KEY;
+const envApiKey = process.env.NEXT_PUBLIC_API_KEY;
 const API_KEY = (envApiKey && envApiKey.trim() !== '') ? envApiKey : "gLzOQGmoJk4b92oJcisx3y4KMFcecp";
 export const API_KEY_HEADER = API_KEY;
 
 // Debug: Log all VITE_ environment variables (for debugging only)
-if (import.meta.env.DEV) {
+if (process.env.NODE_ENV === 'development') {
   console.log('=== Environment Variables Debug ===');
-  console.log('VITE_API_BASE_URI:', import.meta.env.VITE_API_BASE_URI || 'NOT SET');
-  console.log('VITE_API_KEY:', import.meta.env.VITE_API_KEY ? `${import.meta.env.VITE_API_KEY.substring(0, 10)}...` : 'NOT SET');
-  console.log('All VITE_ vars:', Object.keys(import.meta.env).filter(key => key.startsWith('VITE_')));
+  console.log('NEXT_PUBLIC_API_BASE_URI:', process.env.NEXT_PUBLIC_API_BASE_URI || 'NOT SET');
+  console.log('NEXT_PUBLIC_API_KEY:', process.env.NEXT_PUBLIC_API_KEY ? `${process.env.NEXT_PUBLIC_API_KEY.substring(0, 10)}...` : 'NOT SET');
   console.log('===================================');
 }
 

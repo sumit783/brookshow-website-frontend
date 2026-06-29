@@ -1,4 +1,5 @@
-import { useState } from "react";
+"use client";
+
 import { HeroSection } from "@/components/homePage/HeroSection";
 import { TopArtistsSection } from "@/components/homePage/TopArtistsSection";
 import { LiveTicketsSection } from "@/components/homePage/LiveTicketsSection";
@@ -29,3 +30,4 @@ const Index = () => {
 };
 
 export default Index;
+

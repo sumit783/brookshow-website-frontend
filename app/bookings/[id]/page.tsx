@@ -1,4 +1,5 @@
-import { useNavigate, useParams } from "react-router-dom";
+"use client";
+import { useRouter, useParams } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   fetchBookingById,
@@ -17,6 +18,7 @@ import { ArtistInfoCard } from "@/components/bookedArtistPage/ArtistInfoCard";
 import { RatingReviewForm } from "@/components/bookedArtistPage/RatingReviewForm";
 import { ReviewsList } from "@/components/bookedArtistPage/ReviewsList";
 import { type BookArtistResponse } from "@/api/artists";
+import { SEO } from "@/components/SEO";
 
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
@@ -30,7 +32,7 @@ const loadRazorpayScript = () => {
 
 const BookedArtist = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -100,7 +102,7 @@ const BookedArtist = () => {
         }
 
         const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
           amount: resp.razorpayOrder.amount,
           currency: resp.razorpayOrder.currency,
           name: "BrookShow",
@@ -157,7 +159,7 @@ const BookedArtist = () => {
           <p className="text-xl font-semibold">
             {!booking ? "Booking not found" : "Failed to load booking details"}
           </p>
-          <Button onClick={() => navigate("/profile")}>Back to Profile</Button>
+          <Button onClick={() => router.push("/profile")}>Back to Profile</Button>
         </div>
       </div>
     );
@@ -184,8 +186,12 @@ const BookedArtist = () => {
 
   return (
     <div className="min-h-screen bg-background pt-24 pb-12 px-4">
+      <SEO 
+        title="Booking Details - BrookShow"
+        description="View the details of your artist or event booking on BrookShow."
+      />
       <div className="max-w-4xl mx-auto space-y-6">
-        <BookingHeader status={booking.status} onBack={() => navigate(-1)} />
+        <BookingHeader status={booking.status} onBack={() => router.back()} />
 
         <ArtistInfoCard
           booking={booking}

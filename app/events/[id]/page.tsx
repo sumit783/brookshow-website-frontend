@@ -1,4 +1,5 @@
-import { useParams, useNavigate } from "react-router-dom";
+"use client";
+import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import RecommendedEvents from "@/components/eventDetails/RecommendedEvents";
 import { EventHero } from "@/components/eventDetails/EventHero";
@@ -6,7 +7,7 @@ import { EventMainContent } from "@/components/eventDetails/EventMainContent";
 import { EventSidebar } from "@/components/eventDetails/EventSidebar";
 import { TicketDialog } from "@/components/eventDetails/TicketDialog";
 import { useQuery } from "@tanstack/react-query";
-import { fetchEventDetails, type EventDetailsResponse } from "@/api/events";
+import { fetchEventDetails } from "@/api/events";
 import { API_BASE_URI } from "@/api/client";
 import { EventDetailsSkeleton } from "@/components/skeletons/EventDetailsSkeleton";
 import { buyTicket, verifyTicketPurchase } from "@/api/tickets";
@@ -26,7 +27,7 @@ const loadRazorpayScript = () => {
 
 export default function EventDetails() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [openDialog, setOpenDialog] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
 
@@ -76,7 +77,7 @@ export default function EventDetails() {
             {error ? 'Failed to load event details. Please try again later.' : 'The event you are looking for does not exist.'}
           </p>
           <button
-            onClick={() => navigate('/events')}
+            onClick={() => router.push('/events')}
             className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
           >
             Go Back to Events
@@ -102,7 +103,7 @@ export default function EventDetails() {
         title={event.title}
         artist={event.artist || "Unknown Artist"}
         status={event.status}
-        onBack={() => navigate(-1)}
+        onBack={() => router.back()}
       />
 
       <div className="container mx-auto max-w-6xl px-6 py-12">
@@ -145,7 +146,7 @@ export default function EventDetails() {
             localStorage.setItem(`pending_ticket_${event.id}`, JSON.stringify(ticketToSave));
 
             toast.error("Please sign in to buy tickets");
-            navigate("/signin", { state: { redirectTo: window.location.pathname } });
+            router.push(`/signin?redirectTo=${encodeURIComponent(window.location.pathname)}`);
             setIsPaying(false);
             return;
           }
@@ -168,7 +169,7 @@ export default function EventDetails() {
               }
 
               const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
                 amount: response.razorpayOrder.amount,
                 currency: response.razorpayOrder.currency,
                 name: "BrookShow",
@@ -187,7 +188,7 @@ export default function EventDetails() {
                       localStorage.removeItem(`pending_ticket_${event.id}`);
                       setOpenDialog(false);
                       setIsPaying(false);
-                      navigate(`/ticket/${response.ticket._id}`);
+                      router.push(`/ticket/${response.ticket._id}`);
                     } else {
                       toast.error(verifyRes.message || "Payment verification failed");
                       setIsPaying(false);
@@ -215,7 +216,7 @@ export default function EventDetails() {
               localStorage.removeItem(`pending_ticket_${event.id}`);
               setOpenDialog(false);
               setIsPaying(false);
-              navigate(`/ticket/${response.ticket._id}`);
+              router.push(`/ticket/${response.ticket._id}`);
             } else {
               toast.error(response.message || "Failed to purchase ticket");
               setIsPaying(false);

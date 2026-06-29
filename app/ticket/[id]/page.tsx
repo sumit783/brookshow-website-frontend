@@ -1,11 +1,14 @@
+"use client";
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { fetchTicketDetails, Ticket } from "@/api/tickets";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Calendar, MapPin, User, Phone, Users, CheckCircle, ArrowLeft } from "lucide-react";
+import { Loader2, Calendar, MapPin, Phone, Users, CheckCircle, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { API_BASE_URI } from "@/api/client";
+import { SEO } from "@/components/SEO";
 
 const TicketDetails = () => {
     const { id } = useParams<{ id: string }>();
@@ -48,7 +51,7 @@ const TicketDetails = () => {
             <div className="text-center space-y-4">
                 <h2 className="text-2xl font-bold text-destructive">Oops!</h2>
                 <p className="text-muted-foreground">{error || "Ticket not found"}</p>
-                <Link to="/">
+                <Link href="/">
                     <Button variant="outline">Go Home</Button>
                 </Link>
             </div>
@@ -71,6 +74,10 @@ const TicketDetails = () => {
 
     return (
         <div className="min-h-screen bg-background relative flex items-center justify-center p-4 overflow-hidden">
+            <SEO 
+                title="My Ticket - BrookShow"
+                description="View and download your digital ticket QR code for your upcoming event on BrookShow."
+            />
             {/* Animated Background Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[100px] animate-pulse"></div>
@@ -79,7 +86,7 @@ const TicketDetails = () => {
             </div>
 
             <div className="relative z-10 w-full max-w-4xl fade-in-scale">
-                 <Link to="/profile" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
+                 <Link href="/profile" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back to Profile
                  </Link>
 

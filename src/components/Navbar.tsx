@@ -1,4 +1,6 @@
-import { Link, NavLink, useLocation } from "react-router-dom";
+'use client'
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
@@ -9,12 +11,27 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logo from "@/assets/logo.webp";
 
 export const Navbar = () => {
-  const { pathname, hash } = useLocation();
+  const pathname = usePathname() || '/';
+  const hash = typeof window !== 'undefined' ? window.location.hash : '';
   const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 100) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   
   const linkBase = "text-foreground hover:text-accent transition-smooth font-medium";
   const mobileLinkBase = "text-xl text-foreground hover:text-accent transition-smooth font-semibold py-2 border-b border-white/10";
@@ -31,25 +48,29 @@ export const Navbar = () => {
     { name: "Contact", path: "/contact", isActive: isContactActive },
   ];
 
-  const token = localStorage.getItem("token");
-  let userInitial = "U";
-  try {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-        const user = JSON.parse(userStr);
-        if (user.displayName) userInitial = user.displayName[0].toUpperCase();
+  const [token, setToken] = useState<string | null>(null);
+  const [userInitial, setUserInitial] = useState("U");
+
+  useEffect(() => {
+    setToken(localStorage.getItem("token"));
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user.displayName) setUserInitial(user.displayName[0].toUpperCase());
+      }
+    } catch (e) {
+      // ignore
     }
-  } catch (e) {
-    // ignore
-  }
+  }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass backdrop-blur-xl">
+    <nav className={`fixed top-0 left-0 right-0 z-50 glass backdrop-blur-xl transition-all duration-300 ${isScrolled ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}>
       <div className="moving-bg bg-gradient-dark opacity-50 absolute inset-0"></div>
       <div className="relative container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-2">
-            <img src={logo} alt="BrookShow Logo" className="w-auto md:h-14 h-10 object-contain" />
+          <Link href="/" className="flex items-center space-x-2">
+            <img src={logo.src} alt="BrookShow Logo" className="w-auto md:h-14 h-10 object-contain" />
             {/* <span className="text-xl font-bold font-heading text-foreground">
               BrookShow
             </span> */}
@@ -58,19 +79,19 @@ export const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <NavLink 
+              <Link 
                 key={link.name} 
-                to={link.path} 
+                href={link.path} 
                 className={`${linkBase} ${link.isActive ? "text-accent" : ""}`}
               >
                 {link.name}
-              </NavLink>
+              </Link>
             ))}
           </div>
 
           <div className="flex items-center space-x-4">
              {token ? (
-                 <Link to="/profile">
+                 <Link href="/profile">
                      <Avatar className="cursor-pointer hover:ring-2 hover:ring-primary transition-all">
                         <AvatarImage src="" />
                         <AvatarFallback className="bg-primary text-primary-foreground">{userInitial}</AvatarFallback>
@@ -78,7 +99,7 @@ export const Navbar = () => {
                  </Link>
              ) : (
                 <div className="hidden sm:block">
-                  <Link to="/signup">
+                  <Link href="/signup">
                       <Button variant="default" className="bg-primary text-primary-foreground hover:bg-primary/90">
                           Get Started
                       </Button>
@@ -98,23 +119,23 @@ export const Navbar = () => {
                  <SheetContent side="right" className="bg-background/95 backdrop-blur-xl border-l border-white/10 w-full sm:max-w-xs">
                    <SheetHeader className="text-left mb-8">
                      <SheetTitle className="text-2xl font-bold font-heading text-foreground flex items-center gap-2">
-                         <img src={logo} alt="BrookShow Logo" className="w-8 h-8 object-contain" />
+                         <img src={logo.src} alt="BrookShow Logo" className="w-8 h-8 object-contain" />
                          BrookShow
                       </SheetTitle>
                    </SheetHeader>
                    <div className="flex flex-col space-y-4">
                       {navLinks.map((link) => (
-                        <NavLink 
+                        <Link 
                           key={link.name} 
-                          to={link.path} 
+                          href={link.path} 
                           onClick={() => setIsOpen(false)}
                           className={`${mobileLinkBase} ${link.isActive ? "text-accent" : ""}`}
                         >
                           {link.name}
-                        </NavLink>
+                        </Link>
                       ))}
                       {!token && (
-                        <Link to="/signup" onClick={() => setIsOpen(false)} className="pt-4">
+                        <Link href="/signup" onClick={() => setIsOpen(false)} className="pt-4">
                            <Button className="w-full bg-gradient-primary border-0">
                              Get Started
                            </Button>

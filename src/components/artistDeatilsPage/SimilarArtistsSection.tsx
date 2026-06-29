@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router-dom";
+"use client";
+import { useRouter } from "next/navigation";
 import { ArtistCard } from "@/components/artists/ArtistCard";
 import { SimilarArtistsSkeleton } from "@/components/skeletons/SimilarArtistsSkeleton";
 import { API_BASE_URI } from "@/api/client";
@@ -11,7 +12,7 @@ interface SimilarArtistsSectionProps {
 }
 
 export const SimilarArtistsSection = ({ artists, isLoading, error }: SimilarArtistsSectionProps) => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return '';
@@ -54,7 +55,7 @@ export const SimilarArtistsSection = ({ artists, isLoading, error }: SimilarArti
                   city: similarArtist.location, // Map location to city
                   price: similarArtist.price,
                 }}
-                onViewProfile={(artistId) => navigate(`/artists/${artistId}`)}
+                onViewProfile={(artistId) => router.push(`/artists/${artistId}`)}
               />
             ))}
           </div>
