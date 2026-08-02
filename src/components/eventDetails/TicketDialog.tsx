@@ -16,7 +16,7 @@ interface TicketDialogProps {
 export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹", isPaying = false }: TicketDialogProps) => {
   const [name, setName] = useState("");
   const [phoneDigits, setPhoneDigits] = useState("");
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState<number | "">(1);
   const [ticketTypes, setTicketTypes] = useState<EventTicketType[]>([]);
   const [selectedTicketId, setSelectedTicketId] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -68,8 +68,9 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
   const selectedTicket = ticketTypes.find(t => t.id === selectedTicketId);
   const unitPrice = selectedTicket?.price || 0;
   const allowedPerTicket = selectedTicket?.allowedPersonsPerTicket || 1;
-  const total = quantity * unitPrice;
-  const totalPersons = quantity * allowedPerTicket;
+  const parsedQuantity = typeof quantity === 'number' ? quantity : (Number(quantity) || 0);
+  const total = parsedQuantity * unitPrice;
+  const totalPersons = parsedQuantity * allowedPerTicket;
 
   if (!open) return null;
 
@@ -180,7 +181,14 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
                 min={1}
                 className="w-full rounded-lg bg-background/60 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-accent focus:border-accent/40 transition-shadow shadow-inner"
                 value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "") {
+                    setQuantity("");
+                  } else {
+                    setQuantity(Math.max(1, Number(val)));
+                  }
+                }}
                 placeholder="1"
                 aria-required="true"
               />
@@ -215,12 +223,12 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
           <div className="relative mt-6 flex justify-end gap-3">
             <Button variant="outline" onClick={onClose} className="border-white/20">Cancel</Button>
             <Button
-              disabled={!selectedTicketId || loading || isPaying}
+              disabled={!selectedTicketId || loading || isPaying || !quantity || Number(quantity) < 1}
               onClick={() => onPayNow({
                 name,
                 phone: `+91 ${phoneDigits}`,
                 persons: totalPersons,
-                quantity,
+                quantity: Number(quantity) || 1,
                 total,
                 ticketTypeId: selectedTicketId
               })}
