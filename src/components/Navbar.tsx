@@ -52,16 +52,30 @@ export const Navbar = () => {
   const [userInitial, setUserInitial] = useState("U");
 
   useEffect(() => {
-    setToken(localStorage.getItem("token"));
-    try {
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
+    const syncAuth = () => {
+      if (typeof window === "undefined") return;
+      setToken(localStorage.getItem("token"));
+      try {
+        const userStr = localStorage.getItem("user");
+        if (userStr) {
           const user = JSON.parse(userStr);
           if (user.displayName) setUserInitial(user.displayName[0].toUpperCase());
+        } else {
+          setUserInitial("U");
+        }
+      } catch (e) {
+        setUserInitial("U");
       }
-    } catch (e) {
-      // ignore
-    }
+    };
+
+    syncAuth();
+
+    window.addEventListener("storage", syncAuth);
+    window.addEventListener("auth-logout", syncAuth);
+    return () => {
+      window.removeEventListener("storage", syncAuth);
+      window.removeEventListener("auth-logout", syncAuth);
+    };
   }, []);
 
   return (

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Play, ExternalLink, X } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { LazyImage } from "@/components/ui/LazyImage";
 
 interface MediaItem {
@@ -146,6 +146,12 @@ export const MasonryGrid = ({ images, videos, pageSize = 12 }: MasonryGridProps)
       {/* Media Viewer Dialog */}
       <Dialog open={!!selectedMedia} onOpenChange={() => setSelectedMedia(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-black/90 border-none">
+          <DialogTitle className="sr-only">
+            {selectedMedia?.type === 'video' ? 'Portfolio Video Preview' : 'Portfolio Image Preview'}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Enlarged preview of artist portfolio media item
+          </DialogDescription>
           {selectedMedia && (
             <div className="relative">
               <button

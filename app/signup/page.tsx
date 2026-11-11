@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -27,8 +28,48 @@ const SignUp = () => {
     const router = useRouter();
     const [step, setStep] = useState<"register" | "otp">("register");
     const [email, setEmail] = useState("");
-    const [loading, setLoading] = useState(false);
     const [otp, setOtp] = useState("");
+
+    const registerMutation = useMutation({
+        mutationFn: (values: any) => registerUser({ ...values, role: "user" }),
+        onSuccess: (response, variables) => {
+            if (response.success) {
+                toast.success("Registration successful. Please verify your email.");
+                setEmail(variables.email);
+                setStep("otp");
+            } else {
+                toast.error(response.message || "Registration failed");
+            }
+        },
+        onError: (error: any) => {
+            console.error(error);
+            toast.error(error.response?.data?.message || "An error occurred during registration");
+        },
+    });
+
+    const verifyOtpMutation = useMutation({
+        mutationFn: verifyRegistrationOtp,
+        onSuccess: (response) => {
+            if (response.success) {
+                toast.success("Email verified successfully!");
+                if (response.jwtToken) {
+                    localStorage.setItem("token", response.jwtToken);
+                    localStorage.setItem("user", JSON.stringify(response.user));
+                    window.dispatchEvent(new Event("storage"));
+                    window.dispatchEvent(new CustomEvent("auth-logout"));
+                }
+                router.push("/");
+            } else {
+                toast.error(response.message || "Invalid OTP");
+            }
+        },
+        onError: (error: any) => {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Verification failed");
+        },
+    });
+
+    const loading = registerMutation.isPending || verifyOtpMutation.isPending;
 
     const form = useForm<z.infer<typeof registerSchema>>({
         resolver: zodResolver(registerSchema),
@@ -40,49 +81,16 @@ const SignUp = () => {
         },
     });
 
-    const onRegister = async (values: z.infer<typeof registerSchema>) => {
-        setLoading(true);
-        try {
-            const response = await registerUser({ ...values, role: "user" } as any);
-            if (response.success) {
-                toast.success("Registration successful. Please verify your email.");
-                setEmail(values.email);
-                setStep("otp");
-            } else {
-                toast.error(response.message || "Registration failed");
-            }
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error.response?.data?.message || "An error occurred during registration");
-        } finally {
-            setLoading(false);
-        }
+    const onRegister = (values: z.infer<typeof registerSchema>) => {
+        registerMutation.mutate(values);
     };
 
-    const onVerifyOtp = async () => {
+    const onVerifyOtp = () => {
         if (otp.length !== 4) {
             toast.error("Please enter a valid 4-digit OTP");
             return;
         }
-        setLoading(true);
-        try {
-            const response = await verifyRegistrationOtp({ email, otp });
-            if (response.success) {
-                toast.success("Email verified successfully!");
-                if (response.jwtToken) {
-                    localStorage.setItem("token", response.jwtToken);
-                    localStorage.setItem("user", JSON.stringify(response.user));
-                }
-                router.push("/");
-            } else {
-                toast.error(response.message || "Invalid OTP");
-            }
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error.response?.data?.message || "Verification failed");
-        } finally {
-            setLoading(false);
-        }
+        verifyOtpMutation.mutate({ email, otp });
     };
 
     return (

@@ -34,14 +34,16 @@ export const EventHero = ({ image, title, artist, status, onBack }: EventHeroPro
           <div className="mb-4">
             <span
               className={`px-4 py-2 rounded-xl text-xs font-bold shadow-xl border border-white/30 backdrop-blur-xl ${
-                status === "Selling Fast"
+                status?.toLowerCase().replace(/\s+/g, '') === "soldout"
+                  ? "bg-red-500/90 text-white border-red-500/50"
+                  : status === "Selling Fast"
                   ? "bg-gradient-to-r from-red-500/90 to-pink-500/90 text-white"
                   : status === "Limited"
                   ? "bg-gradient-to-r from-yellow-400/90 to-orange-500/90 text-black"
                   : "bg-gradient-to-r from-green-400/90 to-emerald-500/90 text-white"
               }`}
             >
-              {status}
+              {status?.toLowerCase().replace(/\s+/g, '') === "soldout" ? "Sold Out" : status}
             </span>
           </div>
           <h1 className="text-5xl md:text-6xl font-bold font-heading mb-4 bg-gradient-to-r from-white via-accent to-primary bg-clip-text text-transparent">

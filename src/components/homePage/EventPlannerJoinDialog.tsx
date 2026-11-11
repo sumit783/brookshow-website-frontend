@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,6 +61,9 @@ export function EventPlannerJoinDialog({ open, onOpenChange }: EventPlannerJoinD
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Join as Event Planner</DialogTitle>
+          <DialogDescription className="text-muted-foreground text-sm">
+            Sign up as an event planner to book artists and manage events.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-5">
