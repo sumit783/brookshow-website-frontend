@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { fetchUserProfile, UserProfileResponse } from "@/api/user";
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchUserProfile } from "@/api/user";
+import { logoutUser } from "@/api/client";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,34 +12,28 @@ import { BookingsSection } from "@/components/profile/BookingsSection";
 import { SEO } from "@/components/SEO";
 
 const Profile = () => {
-  const router = useRouter();
-  const [profileData, setProfileData] = useState<UserProfileResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: profileResponse, isLoading, error } = useQuery({
+    queryKey: ['userProfile'],
+    queryFn: fetchUserProfile,
+  });
+
+  const profileData = profileResponse?.success ? profileResponse : null;
+  const loading = isLoading;
 
   useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const data = await fetchUserProfile();
-        if (data.success) {
-          setProfileData(data);
-        } else {
-            toast.error("Failed to load profile");
-        }
-      } catch (error) {
-        console.error(error);
-        toast.error("An error occurred while fetching profile");
-      } finally {
-        setLoading(false);
+    if (error) {
+      const status = (error as any)?.response?.status || (error as any)?.status;
+      if (status !== 401) {
+        toast.error("Failed to load profile");
       }
-    };
-    loadProfile();
-  }, []);
+    } else if (profileResponse && !profileResponse.success) {
+      toast.error("Failed to load profile");
+    }
+  }, [error, profileResponse]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    logoutUser({ redirectToLogin: true });
     toast.success("Logged out successfully");
-    router.push("/signin");
   };
 
   if (loading) {

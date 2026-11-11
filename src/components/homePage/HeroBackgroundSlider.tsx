@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ModernSlider } from "@/components/homePage/ModernSlider";
 import { LazyImage } from "@/components/ui/LazyImage";
-import { HeroImage, listHeroImages } from "@/api/hero";
+import { listHeroImages } from "@/api/hero";
 
 // Local Hero Assets (Responsive)
 import desktop1 from "@/assets/desktop1.png";
@@ -17,9 +18,12 @@ const localHeroes = [
 ];
 
 export const HeroBackgroundSlider = () => {
-  const [images, setImages] = useState<HeroImage[]>([]);
   const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
-  const [, setIsLoading] = useState(true);
+
+  const { data: fetchedImages } = useQuery({
+    queryKey: ['heroImages'],
+    queryFn: listHeroImages,
+  });
 
   useEffect(() => {
     // Determine initial device type
@@ -32,25 +36,10 @@ export const HeroBackgroundSlider = () => {
 
     handleResize();
     window.addEventListener('resize', handleResize);
-
-    // Fetch dynamic hero images independently
-    const fetchImages = async () => {
-      try {
-        const fetched = await listHeroImages();
-        if (fetched && fetched.length > 0) {
-          setImages(fetched);
-        }
-      } catch (error) {
-        console.error("Failed to fetch hero images:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchImages();
-
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const images = (fetchedImages && fetchedImages.length > 0) ? fetchedImages : [];
 
   // Combine local responsive images with API images
   const displayImages = [...localHeroes, ...images];

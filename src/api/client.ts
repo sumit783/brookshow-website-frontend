@@ -12,10 +12,63 @@ const client = axios.create({
   },
 });
 
+let isRedirecting = false;
+
+// Auth endpoints that return 401 for incorrect credentials/OTP, not expired session
+const AUTH_ENDPOINTS = [
+  '/api/auth/register',
+  '/api/auth/verify-registration-otp',
+  '/api/auth/request-otp',
+  '/api/auth/verify-email-otp',
+  '/api/auth/login',
+];
+
+/**
+ * Clears user session from storage, dispatches auth events, and optionally redirects to login.
+ */
+export const logoutUser = (options?: { redirectToLogin?: boolean; message?: string }) => {
+  if (typeof window === 'undefined') return;
+
+  const { redirectToLogin = true, message } = options || {};
+
+  // Clear local storage auth items
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+
+  // Notify any active components (Navbar, etc.)
+  window.dispatchEvent(new Event("storage"));
+  window.dispatchEvent(new CustomEvent("auth-logout"));
+
+  if (redirectToLogin) {
+    const isAuthPage =
+      window.location.pathname === '/signin' ||
+      window.location.pathname === '/login' ||
+      window.location.pathname === '/signup';
+
+    if (message) {
+      try {
+        sessionStorage.setItem("auth_redirect_reason", message);
+      } catch (e) {
+        // ignore
+      }
+      toast.error(message);
+    }
+
+    if (!isAuthPage && !isRedirecting) {
+      isRedirecting = true;
+      const currentPath = window.location.pathname + window.location.search;
+      const redirectUrl = `/signin?redirectTo=${encodeURIComponent(currentPath)}`;
+      window.location.href = redirectUrl;
+    }
+  }
+};
+
 client.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
@@ -25,17 +78,18 @@ client.interceptors.response.use(
     return response;
   },
   async (error) => {
-    if (error.response && error.response.status === 401) {
-      // Clear local storage
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+    const status = error?.response?.status ?? error?.status;
 
-      // Notify user
-      toast.error("Session expired. Please sign in again.");
+    if (status === 401) {
+      const requestUrl = error?.config?.url || '';
+      const isAuthEndpoint = AUTH_ENDPOINTS.some((endpoint) => requestUrl.includes(endpoint));
 
-      // Redirect to signin page if not already there
-      if (window.location.pathname !== '/signin') {
-        window.location.href = '/signin';
+      // Only handle session expiration if this is not a signin/signup/OTP submission attempt
+      if (!isAuthEndpoint) {
+        logoutUser({
+          redirectToLogin: true,
+          message: "Session expired. Please sign in again.",
+        });
       }
     }
     return Promise.reject(error);

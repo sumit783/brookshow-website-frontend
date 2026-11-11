@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,15 +23,13 @@ const contactSchema = z.object({
 type ContactFormData = z.infer<typeof contactSchema>;
 
 export default function Contact() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, handleSubmit, formState: { errors }, reset } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
   });
 
-  const onSubmit = async (data: ContactFormData) => {
-    setIsSubmitting(true);
-    try {
-      const response = await sendContactMessage(data as ContactMessageData);
+  const contactMutation = useMutation({
+    mutationFn: (data: ContactMessageData) => sendContactMessage(data),
+    onSuccess: (response) => {
       console.log("Contact API response:", response);
       if (response.success) {
         toast.success(response.message || "Message sent successfully! We'll get back to you soon.");
@@ -39,14 +37,19 @@ export default function Contact() {
       } else {
         toast.error(response.message || "Failed to send message. Please try again.");
       }
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       console.error("Contact form error:", error);
       const errorMessage = error.response?.data?.message || error.message || "Something went wrong. Please try again later.";
       toast.error(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
+    },
+  });
+
+  const onSubmit = (data: ContactFormData) => {
+    contactMutation.mutate(data as ContactMessageData);
   };
+
+  const isSubmitting = contactMutation.isPending;
 
   return (
     <div className="min-h-screen bg-background">

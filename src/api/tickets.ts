@@ -74,10 +74,18 @@ export interface RazorpayOrder {
     currency: string;
 }
 
+export interface BuyTicketPricing {
+    basePrice: number;
+    platformFeePercent: number;
+    platformFee: number;
+    totalAmount: number;
+}
+
 export interface BuyTicketResponse {
     success: boolean;
     message: string;
     ticket: Ticket;
+    pricing?: BuyTicketPricing;
     walletUpdated?: boolean;
     razorpayOrder?: RazorpayOrder;
 }
@@ -89,6 +97,7 @@ export const buyTicket = async (data: BuyTicketData): Promise<BuyTicketResponse>
 
 export interface EventTicketTypesResponse {
     success: boolean;
+    platformFeePercent?: number;
     ticketTypes: EventTicketType[];
 }
 

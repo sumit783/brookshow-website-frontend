@@ -139,9 +139,11 @@ const Events = () => {
                     price: event.price,
                     image: getImageUrl(event.image),
                     status:
-                      event.status === "Selling Fast" ||
-                      event.status === "Available" ||
-                      event.status === "Limited"
+                      event.status?.toLowerCase().replace(/\s+/g, '') === "soldout"
+                        ? "Sold Out"
+                        : event.status === "Selling Fast" ||
+                          event.status === "Available" ||
+                          event.status === "Limited"
                         ? event.status
                         : "Available",
                     attendance: event.attendance || "N/A",

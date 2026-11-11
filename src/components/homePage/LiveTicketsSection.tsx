@@ -92,13 +92,15 @@ export const LiveTicketsSection = () => {
                     {/* Status Badge */}
                     <div className="absolute top-4 left-4">
                       <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${
-                        event.status === 'Selling Fast' 
+                        event.status?.toLowerCase().replace(/\s+/g, '') === 'soldout'
+                          ? 'bg-red-500/90 text-white border-red-500/50'
+                          : event.status === 'Selling Fast' 
                           ? 'bg-red-500/90 text-white border-red-400/30' 
                           : event.status === 'Limited'
                           ? 'bg-yellow-400/90 text-black border-yellow-300/30'
                           : 'bg-green-400/90 text-white border-green-300/30'
                       }`}>
-                        {event.status}
+                        {event.status?.toLowerCase().replace(/\s+/g, '') === 'soldout' ? 'Sold Out' : event.status}
                       </span>
                     </div>
                     
@@ -168,7 +170,7 @@ export const LiveTicketsSection = () => {
         )}
         
         <div className="text-center">
-          <Button variant="outline" size="xl" className="glass-modern hover-neon">
+          <Button variant="outline" size="xl" className="glass-modern hover-neon" onClick={() => router.push('/events')}>
             Browse All Events
           </Button>
         </div>

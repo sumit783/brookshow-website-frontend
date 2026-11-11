@@ -8,9 +8,18 @@ interface EventSidebarProps {
   doors: string;
   location: string;
   onGetTickets: () => void;
+  isSoldOut?: boolean;
 }
 
-export const EventSidebar = ({ price, date, time, doors, location, onGetTickets }: EventSidebarProps) => {
+export const EventSidebar = ({
+  price,
+  date,
+  time,
+  doors,
+  location,
+  onGetTickets,
+  isSoldOut = false,
+}: EventSidebarProps) => {
   return (
     <div className="space-y-6">
       <div className="glass-modern p-6 rounded-2xl sticky top-6">
@@ -39,14 +48,6 @@ export const EventSidebar = ({ price, date, time, doors, location, onGetTickets 
             <p className="text-sm text-muted-foreground">Entry: {doors}</p>
           </div>
 
-          {/* <div className="bg-muted/20 rounded-xl p-4 border border-white/10">
-            <div className="flex items-center gap-3 mb-2">
-              <Users className="w-5 h-5 text-accent" />
-              <span className="text-xs text-muted-foreground uppercase">Attending</span>
-            </div>
-            <p className="font-bold text-foreground">{attendance}</p>
-          </div> */}
-
           <div className="bg-muted/20 rounded-xl p-4 border border-white/10">
             <div className="flex items-center gap-3 mb-2">
               <MapPin className="w-5 h-5 text-accent" />
@@ -56,14 +57,23 @@ export const EventSidebar = ({ price, date, time, doors, location, onGetTickets 
           </div>
         </div>
 
-        <Button variant="ticket" size="lg" className="w-full" onClick={onGetTickets}>
-          Get Tickets
-        </Button>
+        {isSoldOut ? (
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full bg-red-500/15 text-red-400 border border-red-500/30 cursor-not-allowed font-bold hover:bg-red-500/15 hover:text-red-400"
+            disabled
+          >
+            Sold Out
+          </Button>
+        ) : (
+          <Button variant="ticket" size="lg" className="w-full" onClick={onGetTickets}>
+            Get Tickets
+          </Button>
+        )}
 
         <p className="text-xs text-center text-muted-foreground mt-4">18+ • Valid ID Required</p>
       </div>
     </div>
   );
 };
-
-

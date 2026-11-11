@@ -1,5 +1,6 @@
 "use client";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -26,8 +27,62 @@ const SignInContent = () => {
     const redirectTo = searchParams.get("redirectTo") || "/";
     const [step, setStep] = useState<"email" | "otp">("email");
     const [email, setEmail] = useState("");
-    const [loading, setLoading] = useState(false);
     const [otp, setOtp] = useState("");
+
+    const requestOtpMutation = useMutation({
+        mutationFn: requestLoginOtp,
+        onSuccess: (response, variables) => {
+            if (response.success) {
+                toast.success("OTP sent to your email.");
+                setEmail(variables);
+                setStep("otp");
+            } else {
+                toast.error(response.message || "Failed to send OTP");
+            }
+        },
+        onError: (error: any) => {
+            console.error(error);
+            toast.error(error.response?.data?.message || "An error occurred");
+        },
+    });
+
+    const verifyOtpMutation = useMutation({
+        mutationFn: verifyLoginOtp,
+        onSuccess: (response) => {
+            if (response.success) {
+                toast.success("Login successful!");
+                if (response.jwtToken) {
+                    localStorage.setItem("token", response.jwtToken);
+                    localStorage.setItem("user", JSON.stringify(response.user));
+                    window.dispatchEvent(new Event("storage"));
+                    window.dispatchEvent(new CustomEvent("auth-logout"));
+                }
+                router.push(redirectTo);
+            } else {
+                toast.error(response.message || "Invalid OTP");
+            }
+        },
+        onError: (error: any) => {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Login failed");
+        },
+    });
+
+    const loading = requestOtpMutation.isPending || verifyOtpMutation.isPending;
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            try {
+                const reason = sessionStorage.getItem("auth_redirect_reason");
+                if (reason) {
+                    sessionStorage.removeItem("auth_redirect_reason");
+                    toast.error(reason);
+                }
+            } catch (e) {
+                // ignore
+            }
+        }
+    }, []);
 
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),
@@ -36,49 +91,16 @@ const SignInContent = () => {
         },
     });
 
-    const onRequestOtp = async (values: z.infer<typeof loginSchema>) => {
-        setLoading(true);
-        try {
-            const response = await requestLoginOtp(values.email);
-            if (response.success) {
-                toast.success("OTP sent to your email.");
-                setEmail(values.email);
-                setStep("otp");
-            } else {
-                toast.error(response.message || "Failed to send OTP");
-            }
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error.response?.data?.message || "An error occurred");
-        } finally {
-            setLoading(false);
-        }
+    const onRequestOtp = (values: z.infer<typeof loginSchema>) => {
+        requestOtpMutation.mutate(values.email);
     };
 
-    const onVerifyOtp = async () => {
+    const onVerifyOtp = () => {
         if (otp.length !== 4) {
             toast.error("Please enter a valid 4-digit OTP");
             return;
         }
-        setLoading(true);
-        try {
-            const response = await verifyLoginOtp({ email, otp, isLogin: true });
-            if (response.success) {
-                toast.success("Login successful!");
-                if (response.jwtToken) {
-                    localStorage.setItem("token", response.jwtToken);
-                    localStorage.setItem("user", JSON.stringify(response.user));
-                }
-                router.push(redirectTo);
-            } else {
-                toast.error(response.message || "Invalid OTP");
-            }
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error.response?.data?.message || "Login failed");
-        } finally {
-            setLoading(false);
-        }
+        verifyOtpMutation.mutate({ email, otp, isLogin: true });
     };
 
     return (

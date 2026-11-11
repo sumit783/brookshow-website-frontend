@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { fetchTicketDetails, Ticket } from "@/api/tickets";
+import { fetchTicketDetails } from "@/api/tickets";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Calendar, MapPin, CheckCircle, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
@@ -12,30 +12,15 @@ import { SEO } from "@/components/SEO";
 
 const TicketDetails = () => {
     const { id } = useParams<{ id: string }>();
-    const [ticket, setTicket] = useState<Ticket | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data: ticketResponse, isLoading, error: queryError } = useQuery({
+        queryKey: ['ticketDetails', id],
+        queryFn: () => fetchTicketDetails(id!),
+        enabled: !!id,
+    });
 
-    useEffect(() => {
-        const loadTicket = async () => {
-        try {
-            if (!id) return;
-            const data = await fetchTicketDetails(id);
-            if (data.success) {
-                setTicket(data.ticket);
-            } else {
-                setError("Failed to load ticket details");
-            }
-        } catch (err) {
-            setError("An error occurred while fetching ticket details");
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-        };
-
-        loadTicket();
-    }, [id]);
+    const ticket = ticketResponse?.success ? ticketResponse.ticket : null;
+    const loading = isLoading;
+    const error = queryError ? "An error occurred while fetching ticket details" : (!ticketResponse?.success && ticketResponse ? "Failed to load ticket details" : null);
 
     if (loading) {
         return (

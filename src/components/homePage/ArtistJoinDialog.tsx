@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -109,6 +109,9 @@ export function ArtistJoinDialog({ open, onOpenChange }: ArtistJoinDialogProps) 
       <DialogContent className="max-w-2xl h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Join as Artist</DialogTitle>
+          <DialogDescription className="text-muted-foreground text-sm">
+            Join the BrookShow platform as an artist to showcase your talent.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-5">

@@ -6,11 +6,11 @@ import { EventHero } from "@/components/eventDetails/EventHero";
 import { EventMainContent } from "@/components/eventDetails/EventMainContent";
 import { EventSidebar } from "@/components/eventDetails/EventSidebar";
 import { TicketDialog } from "@/components/eventDetails/TicketDialog";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchEventDetails } from "@/api/events";
 import { API_BASE_URI } from "@/api/client";
 import { EventDetailsSkeleton } from "@/components/skeletons/EventDetailsSkeleton";
-import { buyTicket, verifyTicketPurchase } from "@/api/tickets";
+import { buyTicket, verifyTicketPurchase, fetchEventTicketTypes } from "@/api/tickets";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
 
@@ -37,6 +37,41 @@ export default function EventDetails() {
     enabled: !!id,
   });
 
+  const { data: ticketTypesResponse } = useQuery({
+    queryKey: ['ticketTypes', id],
+    queryFn: () => fetchEventTicketTypes(id!),
+    enabled: !!id,
+  });
+
+  const ticketTypes = ticketTypesResponse?.success ? ticketTypesResponse.ticketTypes : [];
+
+  const isEventStatusSoldOut =
+    eventData?.status?.toLowerCase().replace(/\s+/g, '') === 'soldout' ||
+    Boolean((eventData as any)?.isSoldOut) ||
+    Boolean((eventData as any)?.soldOut);
+
+  const areAllTicketTypesSoldOut =
+    ticketTypes.length > 0 &&
+    ticketTypes.every(
+      (t: any) =>
+        Boolean(t.isSoldOut) ||
+        Boolean(t.soldOut) ||
+        t.availableQuantity === 0 ||
+        t.remainingTickets === 0 ||
+        t.remainingQuantity === 0 ||
+        t.status?.toLowerCase().replace(/\s+/g, '') === 'soldout'
+    );
+
+  const isSoldOut = isEventStatusSoldOut || areAllTicketTypesSoldOut;
+
+  const buyTicketMutation = useMutation({
+    mutationFn: buyTicket,
+  });
+
+  const verifyPaymentMutation = useMutation({
+    mutationFn: verifyTicketPurchase,
+  });
+
   // Helper function to get full image URL
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return '';
@@ -54,15 +89,15 @@ export default function EventDetails() {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
   }, [id]);
 
-  // Auto-open ticket dialog if user returns after login with pending ticket data
+  // Auto-open ticket dialog if user returns after login with pending ticket data (and not sold out)
   useEffect(() => {
-    if (id) {
+    if (id && !isSoldOut) {
       const savedTicket = localStorage.getItem(`pending_ticket_${id}`);
       if (savedTicket) {
         setOpenDialog(true);
       }
     }
-  }, [id]);
+  }, [id, isSoldOut]);
 
   if (isLoading) {
     return <EventDetailsSkeleton />;
@@ -102,7 +137,7 @@ export default function EventDetails() {
         image={getImageUrl(event.image)}
         title={event.title}
         artist={event.artist || "Unknown Artist"}
-        status={event.status}
+        status={isSoldOut ? "Sold Out" : event.status}
         onBack={() => router.back()}
       />
 
@@ -121,17 +156,19 @@ export default function EventDetails() {
             time={event.time}
             doors={event.doors}
             location={event.location}
+            isSoldOut={isSoldOut}
             onGetTickets={() => setOpenDialog(true)}
           />
         </div>
       </div>
-      <RecommendedEvents events={{}} currentId={Number(event.id)} /> {/* TODO: Implement actual recommended events fetching */}
+      <RecommendedEvents currentId={event.id} />
       <TicketDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
         eventId={event.id}
         currency={((event.price || "").replace(/[0-9.\s]/g, "") || "₹").replace('$', '₹')}
         isPaying={isPaying}
+        isSoldOut={isSoldOut}
         onPayNow={async (data) => {
           setIsPaying(true);
           const token = localStorage.getItem("token");
@@ -152,7 +189,7 @@ export default function EventDetails() {
           }
 
           try {
-            const response = await buyTicket({
+            const response = await buyTicketMutation.mutateAsync({
               ticketTypeId: data.ticketTypeId,
               quantity: data.quantity,
               buyerName: data.name,
@@ -177,7 +214,7 @@ export default function EventDetails() {
                 order_id: response.razorpayOrder.id,
                 handler: async (resp: any) => {
                   try {
-                    const verifyRes = await verifyTicketPurchase({
+                    const verifyRes = await verifyPaymentMutation.mutateAsync({
                       razorpay_order_id: resp.razorpay_order_id,
                       razorpay_payment_id: resp.razorpay_payment_id,
                       razorpay_signature: resp.razorpay_signature,
