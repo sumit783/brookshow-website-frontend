@@ -88,7 +88,7 @@ export const TicketDialog = ({ open, onClose, onPayNow, eventId, currency = "₹
   const unitPrice = selectedTicket?.price || 0;
   const allowedPerTicket = selectedTicket?.allowedPersonsPerTicket || 1;
   const parsedQuantity = typeof quantity === 'number' ? quantity : (Number(quantity) || 0);
-  const platformFeePercent = ticketTypesResponse?.platformFeePercent ?? 0;
+  const platformFeePercent = Number(ticketTypesResponse?.platformFeePercent || 0);
   const subtotal = parsedQuantity * unitPrice;
   const platformFee = Number(((subtotal * platformFeePercent) / 100).toFixed(2));
   const total = Number((subtotal + platformFee).toFixed(2));

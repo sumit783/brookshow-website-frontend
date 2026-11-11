@@ -35,7 +35,7 @@ export const IntroLoader: React.FC = () => {
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-[#070708] transition-transform duration-1000 ease-[cubic-bezier(0.85,0,0.15,1)] ${
+      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-[#070708] transition-transform duration-1000 [transition-timing-function:cubic-bezier(0.85,0,0.15,1)] ${
         isFadingOut ? "-translate-y-full" : "translate-y-0"
       }`}
     >
